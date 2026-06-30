@@ -529,7 +529,7 @@ function renderOverview() {
     .map(entry => entry[0])
     .join(', ') || '-';
 
-  // RENDER 4 KARTU UTAMA ATAS (Bahasanya sudah diperbaiki agar awam-friendly)
+  // RENDER 4 KARTU UTAMA ATAS
   document.getElementById('ov-metrics').innerHTML = `
     <div class="metric-card">
       <div class="metric-label">Total Website Dibuka</div>
@@ -601,7 +601,10 @@ function renderOverview() {
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: indonesianTooltipConfig }, scales: { y: { ticks: { color: txtColor, callback: v => v>=1000 ? (v/1000)+'k' : v }, grid: { color: 'rgba(128,128,128,0.08)' } }, x: { ticks: { color: txtColor }, grid: { display: false } } } }
   });
 
-  // Mengubah label grafik legand agar lebih ramah awam
+  // DEKLARASI ULANG VARIABLE YANG SEMPAT HILANG DI SINI
+  const siteEngage = sites.map(s => { const v = avgOrNull(filtered.filter(d=>d.site===s).map(d=>d.engage)); return v === null ? 0 : +v.toFixed(1); });
+  const siteBounce = sites.map(s => { const v = avgOrNull(filtered.filter(d=>d.site===s).map(d=>d.bounce)); return v === null ? 0 : +v.toFixed(1); });
+
   destroyChart('engbounce');
   charts['engbounce'] = new Chart(document.getElementById('ch-engbounce'), {
     type: 'bar',
