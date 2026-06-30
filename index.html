@@ -151,12 +151,48 @@
   .notes-banner-item b { font-weight: 600; color: var(--text); flex-shrink: 0; }
   .na-val { color: var(--text3); font-weight: 400; font-style: italic; }
 
-  @media (max-width: 768px) {
-    header { padding: 1rem; flex-direction: column; text-align: center; }
-    .filter-bar > div { min-width: 100%; }
+  /* Tablet: penyesuaian grid dan spacing agar tidak terlalu padat */
+  @media (max-width: 1024px) {
+    .container { padding: 1.25rem; }
+    .grid4 { grid-template-columns: repeat(2, 1fr); }
     .grid2 { grid-template-columns: 1fr; }
-    .filter-wrapper { position: relative; top: auto; padding: 0 0 1.25rem 0; }
+    .site-cards { grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+    .info-box ul { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+  }
+
+  /* Mobile besar / tablet kecil */
+  @media (max-width: 768px) {
+    header { padding: 1rem 1.25rem; flex-wrap: wrap; gap: 10px; }
+    header h1 { font-size: 16px; }
+    .header-actions { width: 100%; justify-content: space-between; }
+    .filter-bar { padding: 1rem; gap: 10px; }
+    .filter-bar > div { min-width: 45%; flex: 1 1 45%; }
+    .filter-bar .btn { flex: 1 1 100%; }
+    .filter-wrapper { position: relative; top: auto; padding: 0 0 1.25rem 0; margin-top: 0; }
+    .grid4 { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .metric-card { padding: 1.1rem; }
+    .metric-val { font-size: 24px; }
+    .card { padding: 1.1rem; }
     .table-wrap { max-height: 60vh; }
+    .tabs { gap: 2px; }
+    .tab { padding: 10px 14px; font-size: 13px; }
+  }
+
+  /* Mobile kecil */
+  @media (max-width: 480px) {
+    .container { padding: 1rem; }
+    header { padding: 0.9rem 1rem; }
+    header h1 { font-size: 15px; }
+    .last-updated-text { display: none; }
+    .grid4 { grid-template-columns: 1fr; }
+    .filter-bar > div { min-width: 100%; flex: 1 1 100%; }
+    .site-cards { grid-template-columns: 1fr; }
+    .metric-val { font-size: 22px; }
+    .chart-wrap { height: 200px !important; }
+    .card-header-flex { flex-direction: column; align-items: stretch; }
+    .card-header-flex .btn { width: 100%; }
+    table { min-width: 720px; }
+    .site-stat-val.countries { max-width: 50%; }
   }
 </style>
 </head>
@@ -167,7 +203,7 @@
     <h1><span aria-hidden="true">📊</span> Enterprise Web Analytics</h1>
   </div>
   <div class="header-actions">
-    <span id="last-updated">Sinkronisasi...</span>
+    <span id="last-updated" class="last-updated-text">Memuat data...</span>
     <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Ubah tema">Dark Mode</button>
   </div>
 </header>
@@ -191,19 +227,19 @@
     <div class="filter-wrapper">
       <div class="filter-bar">
         <div>
-          <label>Website Target</label>
+          <label>Situs Web</label>
           <select id="f-site" onchange="applyFilters()">
             <option value="">Semua Website</option>
           </select>
         </div>
         <div>
-          <label>Tahun Rekaman</label>
+          <label>Tahun</label>
           <select id="f-year" onchange="applyFilters()">
             <option value="">Semua Tahun</option>
           </select>
         </div>
         <div>
-          <label>Periode Bulan</label>
+          <label>Bulan</label>
           <select id="f-month" onchange="applyFilters()">
             <option value="">Semua Bulan</option>
           </select>
@@ -214,20 +250,20 @@
 
     <div id="tab-overview" class="section active">
       <div class="info-box">
-        <h3>Glosarium Kamus Metrik Analisis</h3>
+        <h3>Glosarium Metrik</h3>
         <ul>
-          <li><b>Pengunjung / Hari:</b> Rata-rata lalu lintas unik harian masuk skala per periode.</li>
-          <li><b>Engagement Rate:</b> Rasio keaktifan sesi interaksi visitor di halaman web.</li>
-          <li><b>Bounce Rate:</b> Rasio pentalan langsung keluar sepihak tanpa navigasi lanjutan.</li>
-          <li><b>Event Count:</b> Akumulasi log triggers aktivitas aset mikro (Klik, Scroll, Trigger).</li>
-          <li><b>Whatsapp Leads:</b> Volume konversi klik tombol berlanjut diskusi ke tim marketing.</li>
+          <li><b>Pengunjung / Hari:</b> Rata-rata jumlah pengunjung unik per hari dalam periode tertentu.</li>
+          <li><b>Engagement Rate:</b> Persentase sesi dengan interaksi aktif pengunjung pada halaman web.</li>
+          <li><b>Bounce Rate:</b> Persentase pengunjung yang keluar tanpa melakukan navigasi lanjutan.</li>
+          <li><b>Event Count:</b> Akumulasi jumlah aktivitas tercatat, seperti klik, scroll, dan trigger lainnya.</li>
+          <li><b>Whatsapp Leads:</b> Jumlah klik tombol WhatsApp yang berpotensi menjadi prospek penjualan.</li>
         </ul>
       </div>
 
       <div id="notes-banner-wrap"></div>
       <div class="grid4" id="ov-metrics"></div>
 
-      <h2 style="font-size:15px;font-weight:600;margin-bottom:14px;color:var(--text)">Performa Tinjauan Unit Per-Website</h2>
+      <h2 style="font-size:15px;font-weight:600;margin-bottom:14px;color:var(--text)">Ringkasan Performa per Situs Web</h2>
       <div class="site-cards" id="site-cards"></div>
 
       <div class="grid2">
@@ -237,13 +273,13 @@
           <div class="chart-wrap" style="height:230px"><canvas id="ch-visits"></canvas></div>
         </div>
         <div class="card">
-          <h2>Korelasi Rasio Engagement vs Bounce</h2>
+          <h2>Perbandingan Engagement Rate dan Bounce Rate</h2>
           <div class="legend"><span class="legend-item"><span class="legend-dot" style="background:#2a78d6"></span>Engagement</span><span class="legend-item"><span class="legend-dot" style="background:#e34948"></span>Bounce</span></div>
           <div class="chart-wrap" style="height:230px"><canvas id="ch-engbounce"></canvas></div>
         </div>
       </div>
       <div class="card section-full">
-        <h2>Metrik Konversi Kontak Masuk (Whatsapp Leads)</h2>
+        <h2>Konversi Prospek melalui WhatsApp</h2>
         <div class="legend" id="leg-wa"></div>
         <div class="chart-wrap" style="height:190px"><canvas id="ch-wa-bar"></canvas></div>
       </div>
@@ -264,7 +300,7 @@
         </div>
       </div>
       <div class="card section-full">
-        <h2 id="trend-title">Analisis Pola Historis Dinamis</h2>
+        <h2 id="trend-title">Tren Historis</h2>
         <div class="legend" id="leg-trend"></div>
         <div class="chart-wrap" style="height:320px"><canvas id="ch-trend"></canvas></div>
       </div>
@@ -273,16 +309,16 @@
     <div id="tab-compare" class="section">
       <div class="grid2">
         <div class="card">
-          <h2>Komparasi Rata-rata Skor Keterikatan (Engagement)</h2>
+          <h2>Perbandingan Tingkat Engagement</h2>
           <div class="chart-wrap" style="height:260px"><canvas id="ch-cmp-engage"></canvas></div>
         </div>
         <div class="card">
-          <h2>Komparasi Resiko Batas Pentalan Sesi (Bounce)</h2>
+          <h2>Perbandingan Tingkat Bounce Rate</h2>
           <div class="chart-wrap" style="height:260px"><canvas id="ch-cmp-bounce"></canvas></div>
         </div>
       </div>
       <div class="card section-full">
-        <h2>Skala Keaktifan Event Aksi Terdaftar</h2>
+        <h2>Volume Aktivitas Event</h2>
         <div class="legend" id="leg-events"></div>
         <div class="chart-wrap" style="height:230px"><canvas id="ch-events"></canvas></div>
       </div>
@@ -292,7 +328,7 @@
       <div class="card">
         <div class="card-header-flex" style="flex-wrap: wrap; gap:12px;">
           <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:260px;">
-            <input type="text" id="table-search" class="search-input" placeholder="Ketik untuk menyaring instan (Negara, Domain, Bulan)..." onkeyup="liveSearchTable()">
+            <input type="text" id="table-search" class="search-input" placeholder="Cari berdasarkan negara, domain, atau bulan..." onkeyup="liveSearchTable()">
           </div>
           <button class="btn btn-accent" onclick="exportCSV()">Ekspor Data (CSV)</button>
         </div>
@@ -425,16 +461,16 @@ async function loadData() {
       fetch(SHEET_CSV + '&t=' + Date.now()),
       fetch(NOTES_CSV + '&t=' + Date.now()).catch(() => null)
     ]);
-    if (!res.ok) throw new Error('Koneksi database Google Sheets terputus');
+    if (!res.ok) throw new Error('Tidak dapat memuat data dari sumber');
     const text = await res.text();
     allData = processData(parseCSV(text));
-    if (!allData.length) throw new Error('Data rekord sheet tidak terbaca');
+    if (!allData.length) throw new Error('Data tidak dapat diproses');
 
     if (notesRes && notesRes.ok) {
       try { allNotes = processNotes(parseCSV(await notesRes.text())); } catch(e) { allNotes = []; }
     }
 
-    document.getElementById('last-updated').textContent = 'Sinkron: ' + new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'}) + ' WIB';
+    document.getElementById('last-updated').textContent = 'Diperbarui: ' + new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'}) + ' WIB';
     populateFilters();
     applyFilters();
     document.getElementById('loading').style.display = 'none';
@@ -501,7 +537,7 @@ function renderNotesBanner() {
   const relevant = allNotes.filter(n => (!year || n.y==year) && (!month || n.m==month));
   if (!relevant.length) { wrap.innerHTML = ''; return; }
   wrap.innerHTML = `<div class="notes-banner">${relevant.map(n =>
-    `<div class="notes-banner-item"><b>Notasi Analisis (${MONTHS_FULL[n.m]} ${n.y}):</b><span>${n.note}</span></div>`
+    `<div class="notes-banner-item"><b>Catatan Analisis (${MONTHS_FULL[n.m]} ${n.y}):</b><span>${n.note}</span></div>`
   ).join('')}</div>`;
 }
 
@@ -591,24 +627,24 @@ function renderOverview() {
 
   document.getElementById('ov-metrics').innerHTML = `
     <div class="metric-card">
-      <div class="metric-label">Total Website Dibuka</div>
+      <div class="metric-label">Total Kunjungan Situs</div>
       <div class="metric-val" id="count-visits">0</div>
       ${visitsDelta.html ? visitsDelta.html : `<div class="metric-sub">Total sesi kunjungan dari ${filtered.length} bulan data</div>`}
     </div>
     <div class="metric-card">
-      <div class="metric-label">Peminat via WhatsApp</div>
+      <div class="metric-label">Prospek via WhatsApp</div>
       <div class="metric-val" id="count-wa">0</div>
-      ${waDelta.html ? waDelta.html : `<div class="metric-sub">Jumlah klik tombol chat WA (Calon Leads)</div>`}
+      ${waDelta.html ? waDelta.html : `<div class="metric-sub">Jumlah klik tombol WhatsApp (prospek)</div>`}
     </div>
     <div class="metric-card">
-      <div class="metric-label">Tingkat Ketertarikan</div>
+      <div class="metric-label">Tingkat Engagement</div>
       <div class="metric-val" id="count-engage">0%</div>
-      ${engageDelta.html ? engageDelta.html : `<div class="metric-sub">Pengunjung membaca page & tidak langsung kabur</div>`}
+      ${engageDelta.html ? engageDelta.html : `<div class="metric-sub">Rata-rata engagement rate pengunjung pada periode ini</div>`}
     </div>
     <div class="metric-card">
-      <div class="metric-label">Asal Negara Terbanyak</div>
+      <div class="metric-label">Negara Asal Utama</div>
       <div class="metric-val" style="font-size: 20px; padding-top: 6px; font-weight:700; color:var(--accent)">${topGlobalCountries}</div>
-      <div class="metric-sub">2 Negara dengan traffic paling dominan</div>
+      <div class="metric-sub">Dua negara dengan kontribusi traffic tertinggi</div>
     </div>
   `;
 
@@ -644,11 +680,11 @@ function renderOverview() {
       <div class="site-card">
         <h3>${site}</h3>
         <div class="site-period">${pLabel}</div>
-        <div class="site-stat-row"><span class="site-stat-label">Rata-rata Orang/Hari</span><span class="site-stat-val">${fmtNum(rows.length > 1 ? Math.round(avgOrNull(rows.map(x=>x.daily))) : r.daily)}</span></div>
-        <div class="site-stat-row"><span class="site-stat-label">Total Dibuka (Sesi)</span><span class="site-stat-val">${fmtNum(sumOrNull(rows.map(x=>x.total)))}</span></div>
-        <div class="site-stat-row"><span class="site-stat-label">Persentase Tertarik</span><span class="site-stat-val">${fmtPct(avgOrNull(rows.map(x=>x.engage)))}</span></div>
-        <div class="site-stat-row"><span class="site-stat-label">Klik Chat WhatsApp</span><span class="site-stat-val">${fmtNum(sumOrNull(rows.map(x=>x.wa)))}</span></div>
-        <div class="site-stat-row"><span class="site-stat-label">Target Pasar Utama</span><span class="site-stat-val countries" style="color: var(--accent); font-weight: 600;">${topSiteCountries}</span></div>
+        <div class="site-stat-row"><span class="site-stat-label">Rata-rata Pengunjung/Hari</span><span class="site-stat-val">${fmtNum(rows.length > 1 ? Math.round(avgOrNull(rows.map(x=>x.daily))) : r.daily)}</span></div>
+        <div class="site-stat-row"><span class="site-stat-label">Total Kunjungan (Sesi)</span><span class="site-stat-val">${fmtNum(sumOrNull(rows.map(x=>x.total)))}</span></div>
+        <div class="site-stat-row"><span class="site-stat-label">Engagement Rate</span><span class="site-stat-val">${fmtPct(avgOrNull(rows.map(x=>x.engage)))}</span></div>
+        <div class="site-stat-row"><span class="site-stat-label">Klik WhatsApp</span><span class="site-stat-val">${fmtNum(sumOrNull(rows.map(x=>x.wa)))}</span></div>
+        <div class="site-stat-row"><span class="site-stat-label">Negara Asal Utama</span><span class="site-stat-val countries" style="color: var(--accent); font-weight: 600;">${topSiteCountries}</span></div>
       </div>
     `;
   }).join('');
@@ -687,7 +723,7 @@ function renderTrends() {
   const txtColor = getChartTextColor();
   const gridColor = getChartGridColor();
   const labels = { total: 'Total Kunjungan', daily: 'Pengunjung / Hari', engage: 'Engagement Rate (%)', bounce: 'Bounce Rate (%)', events: 'Event Count', wa: 'Whatsapp Leads' };
-  document.getElementById('trend-title').textContent = 'Pola Arus Grafis ' + labels[metric];
+  document.getElementById('trend-title').textContent = 'Tren ' + labels[metric];
 
   const site = document.getElementById('f-site').value;
   const sites = site ? [site] : allSites();
@@ -755,11 +791,11 @@ function renderCompare() {
 
 function renderTable() {
   const sorted = [...filtered].sort((a,b) => b.y-a.y || b.m-a.m || a.site.localeCompare(b.site));
-  if (!sorted.length) { document.getElementById('tbl-wrap').innerHTML = '<div style="padding:3rem;text-align:center;color:var(--text3);">Arsip data tidak ditemukan.</div>'; return; }
+  if (!sorted.length) { document.getElementById('tbl-wrap').innerHTML = '<div style="padding:3rem;text-align:center;color:var(--text3);">Tidak ada data yang ditemukan.</div>'; return; }
   
   document.getElementById('tbl-wrap').innerHTML = `
     <table>
-      <thead><tr><th>Website Domain</th><th>Bulan</th><th>Tahun</th><th>User/Day</th><th>Total Visitor</th><th>Engagement</th><th>Bounce Rate</th><th>Total Events</th><th>Leads WA</th><th>Top Geo</th></tr></thead>
+      <thead><tr><th>Situs Web</th><th>Bulan</th><th>Tahun</th><th>Pengunjung/Hari</th><th>Total Kunjungan</th><th>Engagement</th><th>Bounce Rate</th><th>Total Event</th><th>Prospek WA</th><th>Negara Utama</th></tr></thead>
       <tbody id="analytics-table-body">${sorted.map(r => `<tr>
         <td><b>${r.site}</b></td>
         <td>${MONTHS_FULL[r.m]}</td>
