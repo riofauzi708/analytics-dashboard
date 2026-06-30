@@ -47,17 +47,24 @@
 
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; transition: background 0.3s ease, color 0.3s ease; }
   
-  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1.25rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 15px; position: relative; transition: background 0.3s ease, border-color 0.3s ease; }
-  header h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; display: flex; align-items: center; gap: 8px; }
-  .header-actions { display: flex; align-items: center; gap: 15px; }
-  header span { font-size: 12px; color: var(--text3); font-variant-numeric: tabular-nums; }
-  
-  .theme-toggle { background: var(--surface2); border: 1px solid var(--border); padding: 0 14px; height: 36px; border-radius: 18px; cursor: pointer; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text2); display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease; }
+  .navbar { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 200; transition: background 0.3s ease, border-color 0.3s ease; }
+  .navbar-row { padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .navbar-brand { font-size: 17px; font-weight: 600; letter-spacing: -0.3px; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .navbar-right { display: flex; align-items: center; gap: 15px; }
+  .navbar-right .last-updated-text { font-size: 12px; color: var(--text3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+  .navbar-menu { display: flex; gap: 4px; padding: 0 1.5rem; border-top: 1px solid var(--border); overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .navbar-menu::-webkit-scrollbar { display: none; }
+
+  .theme-toggle { background: var(--surface2); border: 1px solid var(--border); padding: 0 14px; height: 36px; border-radius: 18px; cursor: pointer; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text2); display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease; flex-shrink: 0; }
   .theme-toggle:hover { border-color: var(--text3); background: var(--surface); color: var(--text); }
+
+  .nav-toggle { display: none; flex-direction: column; justify-content: center; gap: 4px; width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface2); cursor: pointer; flex-shrink: 0; }
+  .nav-toggle-bar { width: 16px; height: 2px; background: var(--text2); margin: 0 auto; border-radius: 2px; transition: all 0.2s ease; }
+  .nav-toggle:hover { border-color: var(--text3); }
 
   .container { max-width: 1280px; margin: 0 auto; padding: 1.5rem; }
   
-  .filter-wrapper { position: sticky; top: 0; z-index: 100; background: linear-gradient(to bottom, var(--bg) 80%, rgba(0,0,0,0)); padding: 0.5rem 0 1.25rem 0; margin-top: -0.5rem; }
+  .filter-wrapper { position: sticky; top: 60px; z-index: 100; background: linear-gradient(to bottom, var(--bg) 80%, rgba(0,0,0,0)); padding: 1.25rem 0 1.25rem 0; }
   .filter-bar { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; background: var(--surface); padding: 1.25rem; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); transition: background 0.3s ease, border-color 0.3s ease; }
   .filter-bar > div { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 150px; }
   .filter-bar label { font-size: 11px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
@@ -95,11 +102,9 @@
   .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); font-weight: 500; }
   .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
   
-  .tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--border); margin-bottom: 1.25rem; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
-  .tabs::-webkit-scrollbar { display: none; }
-  .tab { padding: 12px 20px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; background: none; color: var(--text3); border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.2s ease; white-space: nowrap; flex-shrink: 0; }
+  .tab { padding: 14px 18px; font-size: 13.5px; font-weight: 500; cursor: pointer; border: none; background: none; color: var(--text3); border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.2s ease; white-space: nowrap; flex-shrink: 0; }
   .tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
-  .tab:hover:not(.active) { color: var(--text); background: var(--surface2); border-radius: 8px 8px 0 0; }
+  .tab:hover:not(.active) { color: var(--text); }
   
   .section { display: none; animation: fadeIn 0.4s cubic-bezier(0.16, 1, 0.3, 1); }
   .section.active { display: block; }
@@ -162,28 +167,32 @@
 
   /* Mobile besar / tablet kecil */
   @media (max-width: 768px) {
-    header { padding: 1rem 1.25rem; flex-wrap: wrap; gap: 10px; }
-    header h1 { font-size: 16px; }
-    .header-actions { width: 100%; justify-content: space-between; }
+    .navbar-row { padding: 0 1.25rem; height: 56px; }
+    .navbar-brand { font-size: 15px; }
+    .nav-toggle { display: flex; }
+    .navbar-right .last-updated-text { display: none; }
+    .navbar-menu { display: none; flex-direction: column; gap: 0; padding: 6px 1rem 10px; border-top: 1px solid var(--border); }
+    .navbar-menu.open { display: flex; }
+    .tab { width: 100%; text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--border); border-left: 2px solid transparent; margin-bottom: 0; }
+    .tab.active { border-bottom-color: var(--border); border-left-color: var(--accent); background: var(--accent-light); }
+    .tab:last-child { border-bottom: none; }
     .filter-bar { padding: 1rem; gap: 10px; }
     .filter-bar > div { min-width: 45%; flex: 1 1 45%; }
     .filter-bar .btn { flex: 1 1 100%; }
-    .filter-wrapper { position: relative; top: auto; padding: 0 0 1.25rem 0; margin-top: 0; }
+    .filter-wrapper { top: 56px; padding: 1rem 0; }
     .grid4 { grid-template-columns: repeat(2, 1fr); gap: 12px; }
     .metric-card { padding: 1.1rem; }
     .metric-val { font-size: 24px; }
     .card { padding: 1.1rem; }
     .table-wrap { max-height: 60vh; }
-    .tabs { gap: 2px; }
-    .tab { padding: 10px 14px; font-size: 13px; }
   }
 
   /* Mobile kecil */
   @media (max-width: 480px) {
     .container { padding: 1rem; }
-    header { padding: 0.9rem 1rem; }
-    header h1 { font-size: 15px; }
-    .last-updated-text { display: none; }
+    .navbar-row { padding: 0 1rem; }
+    .navbar-brand { font-size: 14px; }
+    .theme-toggle span.theme-toggle-label { display: none; }
     .grid4 { grid-template-columns: 1fr; }
     .filter-bar > div { min-width: 100%; flex: 1 1 100%; }
     .site-cards { grid-template-columns: 1fr; }
@@ -198,15 +207,28 @@
 </head>
 <body>
 
-<header>
-  <div>
-    <h1><span aria-hidden="true">📊</span> Enterprise Web Analytics</h1>
+<nav class="navbar">
+  <div class="navbar-row">
+    <div class="navbar-brand">
+      <span aria-hidden="true">📊</span> Enterprise Web Analytics
+    </div>
+    <button class="nav-toggle" id="nav-toggle-btn" onclick="toggleNavMenu()" aria-label="Buka menu navigasi" aria-expanded="false">
+      <span class="nav-toggle-bar"></span>
+      <span class="nav-toggle-bar"></span>
+      <span class="nav-toggle-bar"></span>
+    </button>
+    <div class="navbar-right">
+      <span id="last-updated" class="last-updated-text">Memuat data...</span>
+      <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Ubah tema">🌙 <span class="theme-toggle-label">Dark Mode</span></button>
+    </div>
   </div>
-  <div class="header-actions">
-    <span id="last-updated" class="last-updated-text">Memuat data...</span>
-    <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Ubah tema">Dark Mode</button>
+  <div class="navbar-menu" id="navbar-menu">
+    <button class="tab active" onclick="switchTab('overview')">Ringkasan</button>
+    <button class="tab" onclick="switchTab('trends')">Tren Bulanan</button>
+    <button class="tab" onclick="switchTab('compare')">Perbandingan</button>
+    <button class="tab" onclick="switchTab('table')">Data Lengkap</button>
   </div>
-</header>
+</nav>
 
 <div class="container">
   <div id="loading" class="skeleton-wrap">
@@ -217,13 +239,6 @@
   </div>
 
   <div id="main" style="display:none">
-    <div class="tabs">
-      <button class="tab active" onclick="switchTab('overview')">Ringkasan</button>
-      <button class="tab" onclick="switchTab('trends')">Tren Bulanan</button>
-      <button class="tab" onclick="switchTab('compare')">Perbandingan</button>
-      <button class="tab" onclick="switchTab('table')">Data Lengkap</button>
-    </div>
-
     <div class="filter-wrapper">
       <div class="filter-bar">
         <div>
@@ -362,7 +377,7 @@ function initTheme() {
     if (hr >= 18 || hr < 6) targetTheme = 'dark';
   }
   document.documentElement.setAttribute('data-theme', targetTheme);
-  document.getElementById('theme-btn').innerHTML = targetTheme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+  document.getElementById('theme-btn').innerHTML = targetTheme === 'dark' ? '☀️ <span class="theme-toggle-label">Light Mode</span>' : '🌙 <span class="theme-toggle-label">Dark Mode</span>';
 }
 
 function toggleTheme() {
@@ -370,8 +385,15 @@ function toggleTheme() {
   const target = current === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', target);
   localStorage.setItem('theme', target);
-  document.getElementById('theme-btn').innerHTML = target === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
+  document.getElementById('theme-btn').innerHTML = target === 'dark' ? '☀️ <span class="theme-toggle-label">Light Mode</span>' : '🌙 <span class="theme-toggle-label">Dark Mode</span>';
   if (allData.length) applyFilters();
+}
+
+function toggleNavMenu() {
+  const menu = document.getElementById('navbar-menu');
+  const btn = document.getElementById('nav-toggle-btn');
+  const isOpen = menu.classList.toggle('open');
+  btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
 }
 
 const indonesianTooltipConfig = {
@@ -830,6 +852,12 @@ function exportCSV() {
 function switchTab(name) {
   document.querySelectorAll('.tab').forEach((t, i) => t.classList.toggle('active', ['overview','trends','compare','table'][i] === name));
   document.querySelectorAll('.section').forEach((s, i) => s.classList.toggle('active', ['tab-overview','tab-trends','tab-compare','tab-table'][i] === 'tab-'+name));
+  const menu = document.getElementById('navbar-menu');
+  if (menu.classList.contains('open')) {
+    menu.classList.remove('open');
+    document.getElementById('nav-toggle-btn').setAttribute('aria-expanded', 'false');
+  }
+  window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 loadData();
