@@ -49,10 +49,13 @@
   .navbar-row { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
   .navbar-brand { font-size: 16px; font-weight: 600; letter-spacing: -0.3px; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
   
-  .navbar-right { display: flex; align-items: center; gap: 12px; }
-  .navbar-menu { display: flex; align-items: center; gap: 8px; }
-  .navbar-menu-divider { width: 1px; height: 20px; background: var(--border); margin: 0 4px; }
-  .last-updated-text { font-size: 12px; color: var(--text3); font-variant-numeric: tabular-nums; white-space: nowrap; margin-right: 8px; }
+  /* Area Navigasi Utama Desktop */
+  .navbar-left-group { display: flex; align-items: center; gap: 24px; }
+  .navbar-menu { display: flex; align-items: center; gap: 4px; }
+  
+  /* Posisi Ujung Kanan Navbar */
+  .navbar-right { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+  .last-updated-text { font-size: 12px; color: var(--text3); font-variant-numeric: tabular-nums; white-space: nowrap; }
 
   .theme-toggle { background: var(--surface2); border: 1px solid var(--border); width: 38px; height: 38px; border-radius: 10px; cursor: pointer; font-size: 15px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
   .theme-toggle:hover { border-color: var(--text3); background: var(--surface); transform: translateY(-1px); }
@@ -63,6 +66,7 @@
 
   .container { max-width: 1280px; margin: 0 auto; padding: 1.5rem; }
   
+  /* Filter Area Base Layout */
   .filter-wrapper { position: sticky; top: 64px; z-index: 100; background: linear-gradient(to bottom, var(--bg) 85%, rgba(0,0,0,0)); padding: 1rem 0 1.5rem 0; }
   .filter-bar { display: flex; gap: 16px; align-items: flex-end; background: var(--surface); padding: 1.25rem; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); transition: background 0.3s ease, border-color 0.3s ease; }
   .filter-bar > div { display: flex; flex-direction: column; gap: 6px; flex: 1; }
@@ -157,19 +161,18 @@
   .error-msg { text-align: center; padding: 4rem; color: var(--danger); font-size: 15px; font-weight: 500; }
   .section-full { margin-bottom: 1.5rem; }
 
-  /* tablet / desktop-small breakpoint adjustment */
   @media (max-width: 1024px) {
     .grid4 { grid-template-columns: repeat(2, 1fr); }
     .grid2 { grid-template-columns: 1fr; }
   }
 
-  /* Perangkat Mobile (Responsive Strategy Core Update) */
+  /* Perubahan Responsif Mobile Core */
   @media (max-width: 768px) {
-    .navbar-row { height: 56px; padding: 0 1rem; }
-    .nav-toggle { display: flex; }
-    .navbar-menu-divider, .last-updated-text { display: none; }
+    .navbar-row { height: 56px; padding: 0 1rem; position: relative; }
+    .nav-toggle { display: flex; order: 3; }
+    .navbar-right { margin-left: initial; gap: 8px; order: 2; }
+    .last-updated-text { display: none; } /* Tersembunyi di mobile agar menghemat tempat */
     
-    /* Menu Navigasi di Mobile menjadi Dropdown Bersih */
     .navbar-menu { 
       display: none; 
       position: absolute; 
@@ -177,28 +180,45 @@
       flex-direction: column; 
       align-items: stretch; 
       gap: 4px; 
-      padding: 12px; 
+      padding: 10px; 
       background: var(--surface); 
       border-bottom: 1px solid var(--border); 
       box-shadow: 0 8px 16px rgba(0,0,0,0.06); 
       z-index: 199;
     }
     .navbar-menu.open { display: flex; }
-    .tab { width: 100%; justify-content: flex-start; height: 44px; padding: 0 12px; }
+    .tab { width: 100%; justify-content: flex-start; height: 42px; padding: 0 12px; }
 
-    /* Sticky Wrapper & Filter Form Tanpa Side Scroll */
-    .filter-wrapper { top: 56px; padding: 0.5rem 0 1rem 0; }
+    /* Update Filter Mobile: Dibuat Jauh Lebih Kecil & Tidak Memenuhi Layar */
+    .filter-wrapper { top: 56px; padding: 0.5rem 0; }
     .filter-bar { 
       display: grid; 
-      grid-template-columns: repeat(2, 1fr); /* Split menjadi 2 kolom seimbang */
-      gap: 12px; 
-      padding: 1rem; 
+      grid-template-columns: repeat(3, 1fr); /* 3 Kolom sejajar agar hemat baris */
+      gap: 8px; 
+      padding: 0.75rem; 
+      border-radius: 8px;
     }
-    .filter-bar > div { min-width: 0; } /* Cegah overflow konten didalam grid */
+    .filter-bar > div { gap: 3px; }
+    .filter-bar label { font-size: 10px; letter-spacing: 0; }
+    
+    select, .search-input { 
+      height: 32px; /* Diperkecil dari 40px */
+      font-size: 12px; 
+      padding: 0 8px; 
+      border-radius: 6px;
+      background-position: right 8px center;
+      background-size: 12px;
+      padding-right: 24px;
+    }
+    
     .filter-bar .btn-danger-outline { 
-      grid-column: span 2; /* Tombol reset memenuhi baris bawah */
+      grid-column: span 3; /* Tombol reset di baris bawah tipis */
       width: 100%; 
-      margin-top: 4px;
+      height: 30px; 
+      font-size: 12px;
+      padding: 0;
+      margin-top: 2px;
+      border-radius: 6px;
     }
     
     .grid4 { grid-template-columns: repeat(2, 1fr); gap: 12px; }
@@ -206,12 +226,14 @@
     .metric-card { padding: 1rem; }
     .metric-val { font-size: 22px; }
     .card { padding: 1rem; }
-    .chart-wrap { height: 220px !important; }
+    .chart-wrap { height: 210px !important; }
   }
 
   @media (max-width: 480px) {
-    .filter-bar { grid-template-columns: 1fr; } /* Stack penuh jika layar terlampau kecil */
-    .filter-bar .btn-danger-outline { grid-column: span 1; }
+    /* Khusus layar ultra-kecil, jadikan 2 kolom dropdown + 1 baris reset */
+    .filter-bar { grid-template-columns: repeat(2, 1fr); }
+    .filter-bar > div:nth-child(1) { grid-column: span 2; } /* Domain penuh di atas */
+    .filter-bar .btn-danger-outline { grid-column: span 2; }
     .grid4 { grid-template-columns: 1fr; }
     .card-header-flex { flex-direction: column; align-items: stretch; gap: 10px; }
     .card-header-flex .btn { width: 100%; }
@@ -223,8 +245,17 @@
 
 <nav class="navbar">
   <div class="navbar-row">
-    <div class="navbar-brand">
-      <span aria-hidden="true">📊</span> Enterprise Web Analytics
+    <div class="navbar-left-group">
+      <div class="navbar-brand">
+        <span aria-hidden="true">📊</span> Enterprise Web Analytics
+      </div>
+      
+      <div class="navbar-menu" id="navbar-menu">
+        <button class="tab active" onclick="switchTab('overview')">Overview</button>
+        <button class="tab" onclick="switchTab('trends')">Monthly Trends</button>
+        <button class="tab" onclick="switchTab('compare')">Comparison</button>
+        <button class="tab" onclick="switchTab('table')">Data Detail</button>
+      </div>
     </div>
 
     <div class="navbar-right">
@@ -235,13 +266,6 @@
         <span class="nav-toggle-bar"></span>
         <span class="nav-toggle-bar"></span>
       </button>
-    </div>
-
-    <div class="navbar-menu" id="navbar-menu">
-      <button class="tab active" onclick="switchTab('overview')">Overview</button>
-      <button class="tab" onclick="switchTab('trends')">Monthly Trends</button>
-      <button class="tab" onclick="switchTab('compare')">Comparison</button>
-      <button class="tab" onclick="switchTab('table')">Data Detail</button>
     </div>
   </div>
 </nav>
@@ -266,13 +290,13 @@
         <div>
           <label>Year</label>
           <select id="f-year" onchange="applyFilters()">
-            <option value="">Semua Tahun</option>
+            <option value="">Semua</option>
           </select>
         </div>
         <div>
           <label>Month</label>
           <select id="f-month" onchange="applyFilters()">
-            <option value="">Semua Bulan</option>
+            <option value="">Semua</option>
           </select>
         </div>
         <button class="btn btn-danger-outline" onclick="resetFilters()">Reset Filter</button>
@@ -287,7 +311,7 @@
           <li><b>Engagement Rate:</b> Persentase sesi dengan interaksi aktif pengunjung pada halaman website.</li>
           <li><b>Bounce Rate:</b> Persentase pengunjung yang keluar tanpa melakukan navigasi lanjutan.</li>
           <li><b>Event Count:</b> Akumulasi aktivitas tercatat pada website, seperti klik, scroll, dan trigger lainnya.</li>
-          <li><b>WhatsApp Leads:</b> Jumlah klik tombol WhatsApp yang berpotensi menjadi prospek penjualan (sales lead).</li>
+          <li><b>WhatsApp Leads:</b> Jumlah klik tombol WhatsApp yang berpotensi menjadi prospek penjualan.</li>
         </ul>
       </div>
 
@@ -503,7 +527,7 @@ async function loadData() {
       fetch(SHEET_CSV + '&t=' + Date.now()),
       fetch(NOTES_CSV + '&t=' + Date.now()).catch(() => null)
     ]);
-    if (!res.ok) throw new Error('Tidak dapat memuat data — periksa koneksi sumber data');
+    if (!res.ok) throw new Error('Tidak dapat memuat data');
     const text = await res.text();
     allData = processData(parseCSV(text));
     if (!allData.length) throw new Error('Format data tidak valid atau kosong');
@@ -530,8 +554,8 @@ function populateFilters() {
   const months = [...new Set(allData.map(d => d.m))].sort((a,b) => a-b);
   
   document.getElementById('f-site').innerHTML = '<option value="">Semua Website</option>' + sites.map(s => `<option>${s}</option>`).join('');
-  document.getElementById('f-year').innerHTML = '<option value="">Semua Tahun</option>' + years.map(y => `<option>${y}</option>`).join('');
-  document.getElementById('f-month').innerHTML = '<option value="">Semua Bulan</option>' + months.map(m => `<option value="${m}">${MONTHS_FULL[m]}</option>`).join('');
+  document.getElementById('f-year').innerHTML = '<option value="">Semua</option>' + years.map(y => `<option>${y}</option>`).join('');
+  document.getElementById('f-month').innerHTML = '<option value="">Semua</option>' + months.map(m => `<option value="${m}">${MONTHS[m]}</option>`).join('');
 }
 
 function applyFilters() {
@@ -561,10 +585,8 @@ function resetFilters() {
 function liveSearchTable() {
   const query = document.getElementById('table-search').value.toLowerCase();
   const rows = document.querySelectorAll('#analytics-table-body tr');
-  
   rows.forEach(row => {
-    const text = row.innerText.toLowerCase();
-    if (text.includes(query)) {
+    if (row.innerText.toLowerCase().includes(query)) {
       row.classList.remove('hidden-row');
     } else {
       row.classList.add('hidden-row');
@@ -647,8 +669,7 @@ function renderOverview() {
   const countryCounts = {};
   filtered.forEach(d => {
     if (d.countries) {
-      const list = d.countries.split(/[\s,]+/);
-      list.forEach(c => {
+      d.countries.split(/[\s,]+/).forEach(c => {
         const clean = c.trim().toUpperCase();
         if (clean && clean !== '-' && clean !== 'N/A') {
           countryCounts[clean] = (countryCounts[clean] || 0) + 1;
@@ -656,12 +677,7 @@ function renderOverview() {
       });
     }
   });
-  
-  const topGlobalCountries = Object.entries(countryCounts)
-    .sort((a, b) => b[1] - a[1])
-    .slice(0, 2)
-    .map(entry => entry[0])
-    .join(', ') || '-';
+  const topGlobalCountries = Object.entries(countryCounts).sort((a, b) => b[1] - a[1]).slice(0, 2).map(e => e[0]).join(', ') || '-';
 
   const visitsDelta = calculateDelta(totalVisits, 'total');
   const waDelta = calculateDelta(totalWA, 'wa');
@@ -671,17 +687,17 @@ function renderOverview() {
     <div class="metric-card">
       <div class="metric-label">Total Visitor Sessions</div>
       <div class="metric-val" id="count-visits">0</div>
-      ${visitsDelta.html ? visitsDelta.html : `<div class="metric-sub">Total sesi kunjungan dari ${filtered.length} bulan data</div>`}
+      ${visitsDelta.html ? visitsDelta.html : `<div class="metric-sub">Total sesi kunjungan terfilter</div>`}
     </div>
     <div class="metric-card">
       <div class="metric-label">WhatsApp Leads</div>
       <div class="metric-val" id="count-wa">0</div>
-      ${waDelta.html ? waDelta.html : `<div class="metric-sub">Jumlah klik tombol WhatsApp (prospek)</div>`}
+      ${waDelta.html ? waDelta.html : `<div class="metric-sub">Jumlah klik tombol WhatsApp</div>`}
     </div>
     <div class="metric-card">
       <div class="metric-label">Avg. Engagement Rate</div>
       <div class="metric-val" id="count-engage">0%</div>
-      ${engageDelta.html ? engageDelta.html : `<div class="metric-sub">Rata-rata engagement rate pengunjung</div>`}
+      ${engageDelta.html ? engageDelta.html : `<div class="metric-sub">Rata-rata interaksi aktif halaman</div>`}
     </div>
     <div class="metric-card">
       <div class="metric-label">Top Visitor Origin</div>
@@ -712,11 +728,7 @@ function renderOverview() {
         });
       }
     });
-    const topSiteCountries = Object.entries(siteCountryCounts)
-      .sort((a, b) => b[1] - a[1])
-      .slice(0, 2)
-      .map(entry => entry[0])
-      .join(', ') || '-';
+    const topSiteCountries = Object.entries(siteCountryCounts).sort((a, b) => b[1] - a[1]).slice(0, 2).map(e => e[0]).join(', ') || '-';
 
     return `
       <div class="site-card">
@@ -737,12 +749,11 @@ function renderOverview() {
   charts['visits'] = new Chart(document.getElementById('ch-visits'), {
     type: 'bar',
     data: { labels: sites.map(s => s.replace('.com','').replace('.co.id','')), datasets: [{ data: siteTotals, backgroundColor: COLORS.slice(0, sites.length), borderRadius: 6 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: indonesianTooltipConfig }, scales: { y: { ticks: { color: txtColor, callback: v => (v !== null && v >= 1000) ? (v/1000)+'k' : v }, grid: { color: gridColor } }, x: { ticks: { color: txtColor }, grid: { display: false } } } }
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: indonesianTooltipConfig }, scales: { y: { ticks: { color: txtColor, callback: v => v >= 1000 ? (v/1000)+'k' : v }, grid: { color: gridColor } }, x: { ticks: { color: txtColor }, grid: { display: false } } } }
   });
 
   const siteEngage = sites.map(s => { const v = avgOrNull(filtered.filter(d=>d.site===s).map(d=>d.engage)); return v === null ? 0 : +v.toFixed(1); });
   const siteBounce = sites.map(s => { const v = avgOrNull(filtered.filter(d=>d.site===s).map(d=>d.bounce)); return v === null ? 0 : +v.toFixed(1); });
-
   destroyChart('engbounce');
   charts['engbounce'] = new Chart(document.getElementById('ch-engbounce'), {
     type: 'bar',
@@ -779,7 +790,6 @@ function renderTrends() {
       const row = allData.find(d => d.site===s && d.y==y && d.m==+m);
       return row ? row[metric] : null;
     });
-
     const grad = ctx.createLinearGradient(0, 0, 0, 300);
     grad.addColorStop(0, COLORS[i % COLORS.length] + '18');
     grad.addColorStop(1, COLORS[i % COLORS.length] + '00');
@@ -833,7 +843,7 @@ function renderCompare() {
 
 function renderTable() {
   const sorted = [...filtered].sort((a,b) => b.y-a.y || b.m-a.m || a.site.localeCompare(b.site));
-  if (!sorted.length) { document.getElementById('tbl-wrap').innerHTML = '<div style="padding:3rem;text-align:center;color:var(--text3);">Tidak ada data yang ditemukan untuk filter ini.</div>'; return; }
+  if (!sorted.length) { document.getElementById('tbl-wrap').innerHTML = '<div style="padding:3rem;text-align:center;color:var(--text3);">Tidak ada data yang ditemukan.</div>'; return; }
   
   document.getElementById('tbl-wrap').innerHTML = `
     <table>
@@ -844,8 +854,8 @@ function renderTable() {
         <td>${r.y}</td>
         <td>${fmtPlain(r.daily)}</td>
         <td>${fmtPlain(r.total)}</td>
-        <td>${r.engage===null ? '<span class="na-val">-</span>' : `<span class="badge ${r.engage>=50?'badge-green':'badge-blue'}">${r.engage.toFixed(2)}%</span>`}</td>
-        <td>${r.bounce===null ? '<span class="na-val">-</span>' : `<span class="badge ${r.bounce>=70?'badge-red':'badge-green'}">${r.bounce.toFixed(2)}%</span>`}</td>
+        <td>${r.engage===null ? '-' : `<span class="badge ${r.engage>=50?'badge-green':'badge-blue'}">${r.engage.toFixed(2)}%</span>`}</td>
+        <td>${r.bounce===null ? '-' : `<span class="badge ${r.bounce>=70?'badge-red':'badge-green'}">${r.bounce.toFixed(2)}%</span>`}</td>
         <td>${fmtPlain(r.events)}</td>
         <td>${fmtPlain(r.wa)}</td>
         <td><code>${r.countries || '-'}</code></td>
