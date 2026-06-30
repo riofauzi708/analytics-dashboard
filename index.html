@@ -16,6 +16,7 @@
     --text2: #52514e;
     --text3: #898781;
     --accent: #2a78d6;
+    --accent-light: rgba(42, 120, 214, 0.1);
     --success: #1baf7a;
     --danger: #e34948;
     --warning: #eda100;
@@ -27,12 +28,21 @@
   header span { font-size: 12px; color: var(--text3); }
   .container { max-width: 1200px; margin: 0 auto; padding: 1rem 1rem; }
   
-  /* Responsive Filter Bar */
-  .filter-bar { display: flex; gap: 12px; margin-bottom: 1.5rem; flex-wrap: wrap; align-items: flex-end; }
+  /* Improved Sticky Filter Bar */
+  .filter-wrapper { position: sticky; top: 0; z-index: 100; background: var(--bg); padding: 0.5rem 0 1rem 0; }
+  .filter-bar { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; background: var(--surface); padding: 1rem; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.02); }
   .filter-bar > div { display: flex; flex-direction: column; gap: 4px; flex: 1; min-width: 140px; }
-  .filter-bar label { font-size: 12px; color: var(--text3); }
-  select { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); font-size: 13px; cursor: pointer; height: 36px; }
+  .filter-bar label { font-size: 12px; color: var(--text3); font-weight: 500; }
+  select { width: 100%; padding: 8px 10px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface); color: var(--text); font-size: 13px; cursor: pointer; height: 36px; transition: border 0.2s; }
   select:focus { outline: 2px solid var(--accent); outline-offset: 1px; }
+  
+  /* Buttons styling */
+  .btn { height: 36px; padding: 0 16px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 6px; border: 1px solid var(--border); background: var(--surface); color: var(--text2); transition: all 0.2s; }
+  .btn:hover { background: var(--surface2); color: var(--text); border-color: var(--text3); }
+  .btn-accent { background: var(--accent); color: #fff; border: none; }
+  .btn-accent:hover { background: #1b63b8; color: #fff; }
+  .btn-danger-outline { color: var(--danger); border-color: rgba(227, 73, 72, 0.2); }
+  .btn-danger-outline:hover { background: #fdf2f2; border-color: var(--danger); color: var(--danger); }
   
   /* Responsive Grids */
   .grid4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; margin-bottom: 1.5rem; }
@@ -42,8 +52,10 @@
   .metric-label { font-size: 12px; color: var(--text3); margin-bottom: 6px; }
   .metric-val { font-size: 24px; font-weight: 600; color: var(--text); line-height: 1.1; word-break: break-all; }
   .metric-sub { font-size: 12px; color: var(--text3); margin-top: 6px; }
-  .card { background: var(--surface); border-radius: var(--radius); padding: 1.25rem 1.5rem; border: 1px solid var(--border); overflow: hidden; }
-  .card h2 { font-size: 14px; font-weight: 500; color: var(--text2); margin-bottom: 1rem; }
+  .card { background: var(--surface); border-radius: var(--radius); padding: 1.25rem 1.5rem; border: 1px solid var(--border); overflow: hidden; position: relative; }
+  .card-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1rem; gap: 10px; }
+  .card h2 { font-size: 14px; font-weight: 500; color: var(--text2); }
+  .card-header-flex h2 { margin-bottom: 0; }
   .chart-wrap { position: relative; width: 100%; }
   
   .legend { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
@@ -51,7 +63,7 @@
   .legend-dot { width: 10px; height: 10px; border-radius: 2px; flex-shrink: 0; }
   
   /* Responsive Tabs */
-  .tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); margin-bottom: 1.5rem; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .tabs { display: flex; gap: 2px; border-bottom: 1px solid var(--border); margin-bottom: 1rem; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
   .tabs::-webkit-scrollbar { display: none; }
   .tab { padding: 10px 16px; font-size: 13px; font-weight: 500; cursor: pointer; border: none; background: none; color: var(--text3); border-bottom: 2px solid transparent; margin-bottom: -1px; transition: color 0.15s; white-space: nowrap; flex-shrink: 0; }
   .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
@@ -110,6 +122,7 @@
     .grid2 { grid-template-columns: 1fr; }
     .metric-val { font-size: 22px; }
     .card { padding: 1rem; }
+    .filter-wrapper { position: relative; top: normal; padding: 0 0 1rem 0; }
   }
 </style>
 </head>
@@ -134,29 +147,30 @@
       <button class="tab" onclick="switchTab('table')">Data Lengkap</button>
     </div>
 
-    <!-- FILTERS -->
-    <div class="filter-bar">
-      <div>
-        <label>Website</label>
-        <select id="f-site" onchange="applyFilters()">
-          <option value="">Semua website</option>
-        </select>
-      </div>
-      <div>
-        <label>Tahun</label>
-        <select id="f-year" onchange="applyFilters()">
-          <option value="">Semua tahun</option>
-        </select>
-      </div>
-      <div>
-        <label>Bulan</label>
-        <select id="f-month" onchange="applyFilters()">
-          <option value="">Semua bulan</option>
-        </select>
+    <div class="filter-wrapper">
+      <div class="filter-bar">
+        <div>
+          <label>Website</label>
+          <select id="f-site" onchange="applyFilters()">
+            <option value="">Semua website</option>
+          </select>
+        </div>
+        <div>
+          <label>Tahun</label>
+          <select id="f-year" onchange="applyFilters()">
+            <option value="">Semua tahun</option>
+          </select>
+        </div>
+        <div>
+          <label>Bulan</label>
+          <select id="f-month" onchange="applyFilters()">
+            <option value="">Semua bulan</option>
+          </select>
+        </div>
+        <button class="btn btn-danger-outline" onclick="resetFilters()">❌ Reset</button>
       </div>
     </div>
 
-    <!-- OVERVIEW -->
     <div id="tab-overview" class="section active">
       <div class="info-box">
         <h3>📌 Penjelasan Metrik</h3>
@@ -196,9 +210,8 @@
       </div>
     </div>
 
-    <!-- TRENDS -->
     <div id="tab-trends" class="section">
-      <div class="filter-bar" style="margin-bottom:1rem">
+      <div class="filter-bar" style="margin-bottom:1rem; background: transparent; padding: 0; border: none; box-shadow: none;">
         <div>
           <label>Metrik</label>
           <select id="f-metric" onchange="renderTrends()">
@@ -218,7 +231,6 @@
       </div>
     </div>
 
-    <!-- COMPARE -->
     <div id="tab-compare" class="section">
       <div class="grid2">
         <div class="card">
@@ -237,9 +249,12 @@
       </div>
     </div>
 
-    <!-- TABLE -->
     <div id="tab-table" class="section">
       <div class="card">
+        <div class="card-header-flex">
+          <h2>Data Analytics Lengkap</h2>
+          <button class="btn btn-accent" onclick="exportCSV()">📥 Ekspor CSV</button>
+        </div>
         <div class="table-wrap" id="tbl-wrap"></div>
       </div>
     </div>
@@ -259,6 +274,20 @@ let allData = [];
 let filtered = [];
 let allNotes = [];
 let charts = {};
+
+// Indonesian Number Formatter Helper for Tooltips
+const indonesianTooltipConfig = {
+  callbacks: {
+    label: function(context) {
+      let label = context.dataset.label || '';
+      if (label) label += ': ';
+      if (context.parsed.y !== null) {
+        label += context.parsed.y.toLocaleString('id-ID');
+      }
+      return label;
+    }
+  }
+};
 
 function parseCSV(text) {
   const lines = text.trim().split('\n');
@@ -373,6 +402,45 @@ function applyFilters() {
   renderTable();
 }
 
+function resetFilters() {
+  document.getElementById('f-site').value = "";
+  document.getElementById('f-year').value = "";
+  document.getElementById('f-month').value = "";
+  applyFilters();
+}
+
+function exportCSV() {
+  const sorted = [...filtered].sort((a,b) => b.y-a.y || b.m-a.m || a.site.localeCompare(b.site));
+  if (!sorted.length) return;
+  
+  let csvContent = "data:text/csv;charset=utf-8,";
+  csvContent += "Website,Bulan,Tahun,Pengunjung per Hari,Total Kunjungan,Engagement Rate,Bounce Rate,Event Count,Whatsapp Leads,Top Countries\n";
+  
+  sorted.forEach(r => {
+    let row = [
+      r.site,
+      MONTHS_FULL[r.m],
+      r.y,
+      r.daily || 0,
+      r.total || 0,
+      (r.engage ? r.engage.toFixed(2) + "%" : "-"),
+      (r.bounce ? r.bounce.toFixed(2) + "%" : "-"),
+      r.events || 0,
+      r.wa || 0,
+      `"${r.countries || '-'}"`
+    ];
+    csvContent += row.join(",") + "\n";
+  });
+  
+  const encodedUri = encodeURI(csvContent);
+  const link = document.createElement("a");
+  link.setAttribute("href", encodedUri);
+  link.setAttribute("download", `Web_Analytics_Export_${new Date().toISOString().slice(0,10)}.csv`);
+  document.body.appendChild(link);
+  link.click();
+  document.body.removeChild(link);
+}
+
 function renderNotesBanner() {
   const wrap = document.getElementById('notes-banner-wrap');
   const year = document.getElementById('f-year').value;
@@ -385,12 +453,8 @@ function renderNotesBanner() {
 }
 
 function allSites() { return [...new Set(allData.map(d => d.site))].sort(); }
-
 function periodKey(d) { return d.y + '-' + String(d.m).padStart(2,'0'); }
-function allPeriods() {
-  return [...new Set(allData.map(periodKey))].sort();
-}
-
+function allPeriods() { return [...new Set(allData.map(periodKey))].sort(); }
 function destroyChart(id) { if(charts[id]) { charts[id].destroy(); delete charts[id]; } }
 
 function makeLegend(elId, sites) {
@@ -457,7 +521,7 @@ function renderOverview() {
   charts['visits'] = new Chart(document.getElementById('ch-visits'), {
     type: 'bar',
     data: { labels: sites.map(s => s.replace('.com','').replace('.co.id','')), datasets: [{ data: siteTotals, backgroundColor: COLORS.slice(0, sites.length), borderRadius: 4, borderSkipped: false }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => v>=1000 ? Math.round(v/1000)+'k' : v, color: '#898781' }, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { ticks: { color: '#898781', font: { size: 11 } }, grid: { display: false } } } }
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: indonesianTooltipConfig }, scales: { y: { ticks: { callback: v => v>=1000 ? Math.round(v/1000)+'k' : v, color: '#898781' }, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { ticks: { color: '#898781', font: { size: 11 } }, grid: { display: false } } } }
   });
 
   const siteEngage = sites.map(s => { const v = avgOrNull(filtered.filter(d=>d.site===s).map(d=>d.engage)); return v === null ? 0 : +v.toFixed(1); });
@@ -475,7 +539,7 @@ function renderOverview() {
   charts['wa-bar'] = new Chart(document.getElementById('ch-wa-bar'), {
     type: 'bar',
     data: { labels: sites.map(s => s.replace('.com','').replace('.co.id','')), datasets: [{ data: siteWA, backgroundColor: COLORS.slice(0, sites.length), borderRadius: 4 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: '#898781' }, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { ticks: { color: '#898781', font: { size: 11 } }, grid: { display: false } } } }
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: indonesianTooltipConfig }, scales: { y: { ticks: { color: '#898781' }, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { ticks: { color: '#898781', font: { size: 11 } }, grid: { display: false } } } }
   });
 }
 
@@ -489,13 +553,33 @@ function renderTrends() {
   const periods = allPeriods();
   const periodLabels = periods.map(p => { const [y,m] = p.split('-'); return MONTHS[+m] + ' ' + y; });
 
+  const ctx = document.getElementById('ch-trend').getContext('2d');
+
   const datasets = sites.map((s, i) => {
     const vals = periods.map(p => {
       const [y, m] = p.split('-');
       const row = allData.find(d => d.site===s && d.y==y && d.m==+m);
       return row ? row[metric] : null;
     });
-    return { label: s, data: vals, borderColor: COLORS[i%COLORS.length], backgroundColor: 'transparent', tension: 0.3, borderWidth: 2.5, pointRadius: 5, pointBackgroundColor: COLORS[i%COLORS.length], spanGaps: true };
+    
+    // Premium Gradient Effect
+    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
+    gradient.addColorStop(0, COLORS[i % COLORS.length] + '33'); 
+    gradient.addColorStop(1, COLORS[i % COLORS.length] + '00'); 
+
+    return { 
+      label: s, 
+      data: vals, 
+      borderColor: COLORS[i%COLORS.length], 
+      backgroundColor: gradient, 
+      fill: true,
+      tension: 0.3, 
+      borderWidth: 2.5, 
+      pointRadius: 4, 
+      pointHoverRadius: 6,
+      pointBackgroundColor: COLORS[i%COLORS.length], 
+      spanGaps: true 
+    };
   });
 
   makeLegend('leg-trend', sites);
@@ -503,7 +587,7 @@ function renderTrends() {
   charts['trend'] = new Chart(document.getElementById('ch-trend'), {
     type: 'line',
     data: { labels: periodLabels, datasets },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { color: '#898781' }, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { ticks: { color: '#898781', autoSkip: false, maxRotation: 45 }, grid: { display: false } } } }
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: indonesianTooltipConfig }, scales: { y: { ticks: { color: '#898781' }, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { ticks: { color: '#898781', autoSkip: false, maxRotation: 45 }, grid: { display: false } } } }
   });
 }
 
@@ -533,7 +617,7 @@ function renderCompare() {
   charts['events'] = new Chart(document.getElementById('ch-events'), {
     type: 'bar',
     data: { labels, datasets: [{ data: siteEvents, backgroundColor: COLORS.slice(0, sites.length), borderRadius: 4 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => v>=1000 ? Math.round(v/1000)+'k' : v, color: '#898781' }, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { ticks: { color: '#898781', font: { size: 11 } }, grid: { display: false } } } }
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: indonesianTooltipConfig }, scales: { y: { ticks: { callback: v => v>=1000 ? Math.round(v/1000)+'k' : v, color: '#898781' }, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { ticks: { color: '#898781', font: { size: 11 } }, grid: { display: false } } } }
   });
 }
 
