@@ -831,25 +831,54 @@ function renderCompare() {
   const sites = allSites();
   const txtColor = getChartTextColor();
   const gridColor = getChartGridColor();
+  
+  // Ambil data rata-rata angka persentase dengan benar
   const siteEngage = sites.map(s => { const v = avgOrNull(filtered.filter(d=>d.site===s).map(d=>d.engage)); return v === null ? 0 : +v.toFixed(1); });
   const siteBounce = sites.map(s => { const v = avgOrNull(filtered.filter(d=>d.site===s).map(d=>d.bounce)); return v === null ? 0 : +v.toFixed(1); });
   const siteEvents = sites.map(s => sumOrNull(filtered.filter(d=>d.site===s).map(d=>d.events)) || 0);
-  const labels = sites.map(s => s.replace('.com','').replace('.co.id',''));
+  
+  // Bersihkan nama domain agar rapi di label bawah grafik (X-axis)
+  const labels = sites.map(s => s.replace('.com','').replace('.co.id','').replace('.id',''));
 
+  // 1. Perbaikan Grafik Perbandingan Engagement Rate (Vertikal)
   destroyChart('cmp-engage');
   charts['cmp-engage'] = new Chart(document.getElementById('ch-cmp-engage'), {
-    type: 'bar', indexAxis: 'y',
-    data: { labels, datasets: [{ data: siteEngage, backgroundColor: '#2a78d6', borderRadius: 4 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: txtColor, callback: v => v+'%' }, grid: { color: gridColor }, min: 0, max: 100 }, y: { ticks: { color: txtColor }, grid: { display: false } } } }
+    type: 'bar',
+    data: { 
+      labels: labels, // Nama website ditaruh di sini sebagai label bawah
+      datasets: [{ data: siteEngage, backgroundColor: '#2a78d6', borderRadius: 4 }] 
+    },
+    options: { 
+      responsive: true, 
+      maintainAspectRatio: false, 
+      plugins: { legend: { display: false } }, 
+      scales: { 
+        y: { ticks: { color: txtColor, callback: v => v+'%' }, grid: { color: gridColor }, min: 0, max: 100 }, 
+        x: { ticks: { color: txtColor, autoSkip: false, maxRotation: 45, minRotation: 45 }, grid: { display: false } } 
+      } 
+    }
   });
 
+  // 2. Perbaikan Grafik Perbandingan Bounce Rate (Vertikal)
   destroyChart('cmp-bounce');
   charts['cmp-bounce'] = new Chart(document.getElementById('ch-cmp-bounce'), {
-    type: 'bar', indexAxis: 'y',
-    data: { labels, datasets: [{ data: siteBounce, backgroundColor: '#e34948', borderRadius: 4 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: txtColor, callback: v => v+'%' }, grid: { color: gridColor }, min: 0, max: 100 }, y: { ticks: { color: txtColor }, grid: { display: false } } } }
+    type: 'bar',
+    data: { 
+      labels: labels, // Nama website ditaruh di sini sebagai label bawah
+      datasets: [{ data: siteBounce, backgroundColor: '#e34948', borderRadius: 4 }] 
+    },
+    options: { 
+      responsive: true, 
+      maintainAspectRatio: false, 
+      plugins: { legend: { display: false } }, 
+      scales: { 
+        y: { ticks: { color: txtColor, callback: v => v+'%' }, grid: { color: gridColor }, min: 0, max: 100 }, 
+        x: { ticks: { color: txtColor, autoSkip: false, maxRotation: 45, minRotation: 45 }, grid: { display: false } } 
+      } 
+    }
   });
 
+  // 3. Grafik Volume Event
   makeLegend('leg-events', sites);
   destroyChart('events');
   charts['events'] = new Chart(document.getElementById('ch-events'), {
