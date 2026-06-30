@@ -48,11 +48,11 @@
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; transition: background 0.3s ease, color 0.3s ease; }
   
   header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1.25rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 15px; position: relative; transition: background 0.3s ease, border-color 0.3s ease; }
-  header h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
+  header h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; display: flex; align-items: center; gap: 8px; }
   .header-actions { display: flex; align-items: center; gap: 15px; }
   header span { font-size: 12px; color: var(--text3); font-variant-numeric: tabular-nums; }
   
-  .theme-toggle { background: var(--surface2); border: 1px solid var(--border); padding: 0 14px; height: 36px; border-radius: 18px; cursor: pointer; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text2); display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+  .theme-toggle { background: var(--surface2); border: 1px solid var(--border); padding: 0 14px; height: 36px; border-radius: 18px; cursor: pointer; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text2); display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease; }
   .theme-toggle:hover { border-color: var(--text3); background: var(--surface); color: var(--text); }
 
   .container { max-width: 1280px; margin: 0 auto; padding: 1.5rem; }
@@ -110,9 +110,9 @@
   .badge-blue { background: var(--accent-light); color: var(--accent); }
   .badge-red { background: rgba(227, 73, 72, 0.12); color: var(--danger); }
   
-  .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 10px; border: 1px solid var(--border); }
+  .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 10px; border: 1px solid var(--border); max-height: 70vh; overflow-y: auto; position: relative; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 900px; text-align: left; }
-  th { padding: 12px 16px; color: var(--text3); font-weight: 600; font-size: 11px; background: var(--surface2); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
+  th { padding: 12px 16px; color: var(--text3); font-weight: 600; font-size: 11px; background: var(--surface2); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 5; box-shadow: 0 1px 0 var(--border); }
   td { padding: 14px 16px; border-bottom: 1px solid var(--border); color: var(--text); transition: background 0.15s ease; }
   tr:last-child td { border-bottom: none; }
   tr:hover td { background: var(--surface2); }
@@ -156,6 +156,7 @@
     .filter-bar > div { min-width: 100%; }
     .grid2 { grid-template-columns: 1fr; }
     .filter-wrapper { position: relative; top: auto; padding: 0 0 1.25rem 0; }
+    .table-wrap { max-height: 60vh; }
   }
 </style>
 </head>
@@ -163,7 +164,7 @@
 
 <header>
   <div>
-    <h1>Enterprise Web Analytics</h1>
+    <h1><span aria-hidden="true">📊</span> Enterprise Web Analytics</h1>
   </div>
   <div class="header-actions">
     <span id="last-updated">Sinkronisasi...</span>
@@ -325,7 +326,7 @@ function initTheme() {
     if (hr >= 18 || hr < 6) targetTheme = 'dark';
   }
   document.documentElement.setAttribute('data-theme', targetTheme);
-  document.getElementById('theme-btn').textContent = targetTheme === 'dark' ? 'Light Mode' : 'Dark Mode';
+  document.getElementById('theme-btn').innerHTML = targetTheme === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
 }
 
 function toggleTheme() {
@@ -333,7 +334,7 @@ function toggleTheme() {
   const target = current === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', target);
   localStorage.setItem('theme', target);
-  document.getElementById('theme-btn').textContent = target === 'dark' ? 'Light Mode' : 'Dark Mode';
+  document.getElementById('theme-btn').innerHTML = target === 'dark' ? '☀️ Light Mode' : '🌙 Dark Mode';
   if (allData.length) applyFilters();
 }
 
