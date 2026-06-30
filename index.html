@@ -8,7 +8,6 @@
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
   
-  /* Advanced CSS Variables for Dynamic Theme Switching */
   :root {
     --bg: #f5f5f3;
     --surface: #ffffff;
@@ -46,22 +45,20 @@
     --shimmer-glow: #2d3144;
   }
 
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; transition: background 0.4s ease, color 0.4s ease; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; transition: background 0.3s ease, color 0.3s ease; }
   
-  /* Header & Theme Switcher UX */
-  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1.25rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 15px; position: relative; transition: background 0.4s ease, border-color 0.4s ease; }
+  header { background: var(--surface); border-bottom: 1px solid var(--border); padding: 1.25rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 15px; position: relative; transition: background 0.3s ease, border-color 0.3s ease; }
   header h1 { font-size: 18px; font-weight: 600; letter-spacing: -0.3px; }
   .header-actions { display: flex; align-items: center; gap: 15px; }
   header span { font-size: 12px; color: var(--text3); font-variant-numeric: tabular-nums; }
   
-  .theme-toggle { background: var(--surface2); border: 1px solid var(--border); width: 40px; height: 40px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 18px; transition: all 0.2s ease; }
-  .theme-toggle:hover { transform: scale(1.05); border-color: var(--text3); }
+  .theme-toggle { background: var(--surface2); border: 1px solid var(--border); padding: 0 14px; height: 36px; border-radius: 18px; cursor: pointer; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text2); display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
+  .theme-toggle:hover { border-color: var(--text3); background: var(--surface); color: var(--text); }
 
   .container { max-width: 1280px; margin: 0 auto; padding: 1.5rem; }
   
-  /* Sticky Filter Bar with Modern Visual Treatment */
   .filter-wrapper { position: sticky; top: 0; z-index: 100; background: linear-gradient(to bottom, var(--bg) 80%, rgba(0,0,0,0)); padding: 0.5rem 0 1.25rem 0; margin-top: -0.5rem; }
-  .filter-bar { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; background: var(--surface); padding: 1.25rem; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); transition: background 0.4s ease, border-color 0.4s ease, box-shadow 0.4s ease; }
+  .filter-bar { display: flex; gap: 12px; flex-wrap: wrap; align-items: flex-end; background: var(--surface); padding: 1.25rem; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); transition: background 0.3s ease, border-color 0.3s ease; }
   .filter-bar > div { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 150px; }
   .filter-bar label { font-size: 11px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
   select, .search-input { width: 100%; padding: 0 12px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface2); color: var(--text); font-size: 13px; cursor: pointer; height: 40px; transition: all 0.2s ease; -webkit-appearance: none; appearance: none; }
@@ -69,7 +66,6 @@
   select:focus, .search-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
   .search-input { cursor: text; }
   
-  /* Advanced Buttons */
   .btn { height: 40px; padding: 0 18px; border-radius: 10px; font-size: 13px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
   .btn:hover { background: var(--surface); color: var(--text); border-color: var(--text3); transform: translateY(-1px); }
   .btn-accent { background: var(--accent); color: #fff; border: none; }
@@ -77,17 +73,20 @@
   .btn-danger-outline { color: var(--danger); border-color: rgba(227, 73, 72, 0.15); }
   .btn-danger-outline:hover { background: rgba(227, 73, 72, 0.08); border-color: var(--danger); color: var(--danger); }
   
-  /* Micro-interactions Grids & Premium Elevation Cards */
   .grid4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 1.5rem; }
   .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 20px; margin-bottom: 1.5rem; }
   
-  .metric-card { background: var(--surface); border-radius: var(--radius); padding: 1.5rem; border: 1px solid var(--border); box-shadow: var(--shadow); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, background 0.4s ease; }
+  .metric-card { background: var(--surface); border-radius: var(--radius); padding: 1.5rem; border: 1px solid var(--border); box-shadow: var(--shadow); transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.3s ease, background 0.3s ease; }
   .metric-card:hover { transform: translateY(-4px); box-shadow: var(--shadow-hover); }
   .metric-label { font-size: 12px; color: var(--text3); font-weight: 500; margin-bottom: 8px; }
-  .metric-val { font-size: 28px; font-weight: 700; color: var(--text); line-height: 1.1; letter-spacing: -0.5px; }
-  .metric-sub { font-size: 12px; color: var(--text3); margin-top: 8px; }
+  .metric-val { font-size: 28px; font-weight: 700; color: var(--text); line-height: 1.1; letter-spacing: -0.5px; font-variant-numeric: tabular-nums; }
+  .metric-delta { font-size: 12px; margin-top: 6px; display: flex; align-items: center; gap: 4px; font-weight: 500; }
+  .metric-delta.up { color: var(--success); }
+  .metric-delta.down { color: var(--danger); }
+  .metric-delta.neutral { color: var(--text3); }
+  .metric-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
   
-  .card { background: var(--surface); border-radius: var(--radius); padding: 1.5rem; border: 1px solid var(--border); box-shadow: var(--shadow); position: relative; overflow: hidden; transition: background 0.4s ease, border-color 0.4s ease; }
+  .card { background: var(--surface); border-radius: var(--radius); padding: 1.5rem; border: 1px solid var(--border); box-shadow: var(--shadow); position: relative; overflow: hidden; transition: background 0.3s ease, border-color 0.3s ease; }
   .card-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; gap: 10px; }
   .card h2 { font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -0.1px; }
   .chart-wrap { position: relative; width: 100%; }
@@ -96,7 +95,6 @@
   .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); font-weight: 500; }
   .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
   
-  /* Fluid Navigation Tabs */
   .tabs { display: flex; gap: 6px; border-bottom: 1px solid var(--border); margin-bottom: 1.25rem; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
   .tabs::-webkit-scrollbar { display: none; }
   .tab { padding: 12px 20px; font-size: 14px; font-weight: 500; cursor: pointer; border: none; background: none; color: var(--text3); border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.2s ease; white-space: nowrap; flex-shrink: 0; }
@@ -112,7 +110,6 @@
   .badge-blue { background: var(--accent-light); color: var(--accent); }
   .badge-red { background: rgba(227, 73, 72, 0.12); color: var(--danger); }
   
-  /* Table Layout & Smooth Filtering Triggers */
   .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 10px; border: 1px solid var(--border); }
   table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 900px; text-align: left; }
   th { padding: 12px 16px; color: var(--text3); font-weight: 600; font-size: 11px; background: var(--surface2); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); }
@@ -121,7 +118,6 @@
   tr:hover td { background: var(--surface2); }
   tr.hidden-row { display: none; }
   
-  /* Skeleton Loading Engine */
   .skeleton-wrap { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
   .skeleton-card { height: 120px; background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 1.5rem; position: relative; overflow: hidden; }
   .skeleton-element { background: linear-gradient(90deg, var(--shimmer) 25%, var(--shimmer-glow) 37%, var(--shimmer) 63%); background-size: 400% 100%; animation: shimmer 1.4s ease infinite; border-radius: 4px; }
@@ -132,9 +128,8 @@
   .error-msg { text-align: center; padding: 4rem; color: var(--danger); font-size: 15px; font-weight: 500; }
   .section-full { margin-bottom: 1.5rem; }
   
-  /* Site Detail Grid Adjustment */
   .site-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-bottom: 1.5rem; }
-  .site-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; display: flex; flex-direction: column; box-shadow: var(--shadow); transition: background 0.4s ease, box-shadow 0.3s ease; }
+  .site-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; display: flex; flex-direction: column; box-shadow: var(--shadow); transition: background 0.3s ease, box-shadow 0.3s ease; }
   .site-card:hover { box-shadow: var(--shadow-hover); }
   .site-card h3 { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 2px; letter-spacing: -0.2px; }
   .site-card .site-period { font-size: 12px; color: var(--text3); margin-bottom: 1.25rem; }
@@ -168,11 +163,11 @@
 
 <header>
   <div>
-    <h1>📊 Enterprise Web Analytics</h1>
+    <h1>Enterprise Web Analytics</h1>
   </div>
   <div class="header-actions">
     <span id="last-updated">Sinkronisasi...</span>
-    <button class="theme-toggle" onclick="toggleTheme()" aria-label="Ubah tema">🌓</button>
+    <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Ubah tema">Dark Mode</button>
   </div>
 </header>
 
@@ -212,13 +207,13 @@
             <option value="">Semua Bulan</option>
           </select>
         </div>
-        <button class="btn btn-danger-outline" onclick="resetFilters()">❌ Reset</button>
+        <button class="btn btn-danger-outline" onclick="resetFilters()">Reset Filter</button>
       </div>
     </div>
 
     <div id="tab-overview" class="section active">
       <div class="info-box">
-        <h3>💡 Glosarium Kamus Metrik Analisis</h3>
+        <h3>Glosarium Kamus Metrik Analisis</h3>
         <ul>
           <li><b>Pengunjung / Hari:</b> Rata-rata lalu lintas unik harian masuk skala per periode.</li>
           <li><b>Engagement Rate:</b> Rasio keaktifan sesi interaksi visitor di halaman web.</li>
@@ -296,9 +291,9 @@
       <div class="card">
         <div class="card-header-flex" style="flex-wrap: wrap; gap:12px;">
           <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:260px;">
-            <input type="text" id="table-search" class="search-input" placeholder="🔍 Ketik untuk menyaring instan (Negara, Domain, Bulan)..." onkeyup="liveSearchTable()">
+            <input type="text" id="table-search" class="search-input" placeholder="Ketik untuk menyaring instan (Negara, Domain, Bulan)..." onkeyup="liveSearchTable()">
           </div>
-          <button class="btn btn-accent" onclick="exportCSV()">📥 Ekspor Data (CSV)</button>
+          <button class="btn btn-accent" onclick="exportCSV()">Ekspor Data (CSV)</button>
         </div>
         <div class="table-wrap" id="tbl-wrap"></div>
       </div>
@@ -320,30 +315,29 @@ let filtered = [];
 let allNotes = [];
 let charts = {};
 
-// Theme Management Engine
 function initTheme() {
   const savedTheme = localStorage.getItem('theme');
+  let targetTheme = 'light';
   if (savedTheme) {
-    document.documentElement.setAttribute('data-theme', savedTheme);
+    targetTheme = savedTheme;
   } else {
-    // Smart Automation: Dark mode automatically at evening (18:00 - 06:00)
     const hr = new Date().getHours();
-    if (hr >= 18 || hr < 6) {
-      document.documentElement.setAttribute('data-theme', 'dark');
-    } else {
-      document.documentElement.setAttribute('data-theme', 'light');
-    }
+    if (hr >= 18 || hr < 6) targetTheme = 'dark';
   }
+  document.documentElement.setAttribute('data-theme', targetTheme);
+  document.getElementById('theme-btn').textContent = targetTheme === 'dark' ? 'Light Mode' : 'Dark Mode';
 }
+
 function toggleTheme() {
   const current = document.documentElement.getAttribute('data-theme');
   const target = current === 'dark' ? 'light' : 'dark';
   document.documentElement.setAttribute('data-theme', target);
   localStorage.setItem('theme', target);
-  // Soft reload layout configs for chart fonts compatibility
-  applyFilters();
+  document.getElementById('theme-btn').textContent = target === 'dark' ? 'Light Mode' : 'Dark Mode';
+  
+  // Re-apply filters to force redraw charts with newly theme colors
+  if (allData.length) applyFilters();
 }
-initTheme();
 
 const indonesianTooltipConfig = {
   callbacks: {
@@ -402,8 +396,33 @@ function sumOrNull(arr) {
   return vals.length ? vals.reduce((a,b)=>a+b,0) : null;
 }
 
+// Counter Roller Engine
+function animateValue(obj, start, end, duration, isPercentage = false) {
+  if (!obj) return;
+  if (end === null || end === undefined || isNaN(end)) {
+    obj.innerHTML = '<span class="na-val">N/A</span>';
+    return;
+  }
+  let startTimestamp = null;
+  const step = (timestamp) => {
+    if (!startTimestamp) startTimestamp = timestamp;
+    const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+    const currentVal = progress * (end - start) + start;
+    if (isPercentage) {
+      obj.innerHTML = currentVal.toFixed(2).replace(/\.00$/,'') + '%';
+    } else {
+      obj.innerHTML = Math.floor(currentVal).toLocaleString('id-ID');
+    }
+    if (progress < 1) {
+      window.requestAnimationFrame(step);
+    }
+  };
+  window.requestAnimationFrame(step);
+}
+
 async function loadData() {
   try {
+    initTheme();
     const [res, notesRes] = await Promise.all([
       fetch(SHEET_CSV + '&t=' + Date.now()),
       fetch(NOTES_CSV + '&t=' + Date.now()).catch(() => null)
@@ -425,7 +444,7 @@ async function loadData() {
   } catch(e) {
     document.getElementById('loading').style.display = 'none';
     document.getElementById('error').style.display = 'block';
-    document.getElementById('error').textContent = '⚠️ ' + e.message;
+    document.getElementById('error').textContent = 'Error: ' + e.message;
   }
 }
 
@@ -453,7 +472,6 @@ function applyFilters() {
   renderTrends();
   renderCompare();
   renderTable();
-  // Clear search field on global filter switch
   document.getElementById('table-search').value = '';
 }
 
@@ -464,7 +482,6 @@ function resetFilters() {
   applyFilters();
 }
 
-// Global Live Search System
 function liveSearchTable() {
   const query = document.getElementById('table-search').value.toLowerCase();
   const rows = document.querySelectorAll('#analytics-table-body tr');
@@ -486,7 +503,7 @@ function renderNotesBanner() {
   const relevant = allNotes.filter(n => (!year || n.y==year) && (!month || n.m==month));
   if (!relevant.length) { wrap.innerHTML = ''; return; }
   wrap.innerHTML = `<div class="notes-banner">${relevant.map(n =>
-    `<div class="notes-banner-item"><b>📝 Notasi Analisis (${MONTHS_FULL[n.m]} ${n.y}):</b><span>${n.note}</span></div>`
+    `<div class="notes-banner-item"><b>Notasi Analisis (${MONTHS_FULL[n.m]} ${n.y}):</b><span>${n.note}</span></div>`
   ).join('')}</div>`;
 }
 
@@ -494,7 +511,8 @@ function allSites() { return [...new Set(allData.map(d => d.site))].sort(); }
 function periodKey(d) { return d.y + '-' + String(d.m).padStart(2,'0'); }
 function allPeriods() { return [...new Set(allData.map(periodKey))].sort(); }
 function destroyChart(id) { if(charts[id]) { charts[id].destroy(); delete charts[id]; } }
-function getChartTextColor() { return document.documentElement.getAttribute('data-theme') === 'dark' ? '#6b7280' : '#898781'; }
+function getChartTextColor() { return document.documentElement.getAttribute('data-theme') === 'dark' ? '#b3b7c3' : '#52514e'; }
+function getChartGridColor() { return document.documentElement.getAttribute('data-theme') === 'dark' ? 'rgba(255,255,255,0.05)' : 'rgba(0,0,0,0.04)'; }
 
 function makeLegend(elId, sites) {
   document.getElementById(elId).innerHTML = sites.map((s,i) =>
@@ -502,14 +520,55 @@ function makeLegend(elId, sites) {
   ).join('');
 }
 
+// MoM Delta Computation Engine
+function calculateDelta(currentVal, metricName) {
+  const siteFilter = document.getElementById('f-site').value;
+  const yearFilter = document.getElementById('f-year').value;
+  const monthFilter = document.getElementById('f-month').value;
+
+  if (!yearFilter || !monthFilter || currentVal === null || currentVal === 0) {
+    return { html: '', class: 'neutral' };
+  }
+
+  let prevMonth = parseInt(monthFilter) - 1;
+  let prevYear = parseInt(yearFilter);
+  if (prevMonth === 0) {
+    prevMonth = 12;
+    prevYear -= 1;
+  }
+
+  const prevData = allData.filter(d => 
+    (!siteFilter || d.site === siteFilter) && d.y === prevYear && d.m === prevMonth
+  );
+
+  if (!prevData.length) return { html: '', class: 'neutral' };
+
+  let prevVal = 0;
+  if (metricName === 'total' || metricName === 'wa') {
+    prevVal = sumOrNull(prevData.map(x => x[metricName])) || 0;
+  } else if (metricName === 'engage') {
+    prevVal = avgOrNull(prevData.map(x => x[metricName])) || 0;
+  }
+
+  if (prevVal === 0 || prevVal === null) return { html: '', class: 'neutral' };
+
+  const pctChange = ((currentVal - prevVal) / prevVal) * 100;
+  const sign = pctChange > 0 ? '▲' : pctChange < 0 ? '▼' : '•';
+  const cls = pctChange > 0 ? 'up' : pctChange < 0 ? 'down' : 'neutral';
+  
+  return {
+    html: `<div class="metric-delta ${cls}"><span>${sign}</span> <span>${Math.abs(pctChange).toFixed(1)}%</span> <span style="color:var(--text3); font-weight:400">vs bulan lalu</span></div>`,
+    class: cls
+  };
+}
+
 function renderOverview() {
   const totalVisits = sumOrNull(filtered.map(d=>d.total)) || 0;
   const totalWA = sumOrNull(filtered.map(d=>d.wa));
   const avgEngage = avgOrNull(filtered.map(d=>d.engage));
-  const avgBounce = avgOrNull(filtered.map(d=>d.bounce));
   const txtColor = getChartTextColor();
+  const gridColor = getChartGridColor();
 
-  // 1. HITUNG TOP 2 COUNTRIES SECARA GLOBAL AGREGASI
   const countryCounts = {};
   filtered.forEach(d => {
     if (d.countries) {
@@ -529,31 +588,38 @@ function renderOverview() {
     .map(entry => entry[0])
     .join(', ') || '-';
 
-  // RENDER 4 KARTU UTAMA ATAS
+  const visitsDelta = calculateDelta(totalVisits, 'total');
+  const waDelta = calculateDelta(totalWA, 'wa');
+  const engageDelta = calculateDelta(avgEngage, 'engage');
+
   document.getElementById('ov-metrics').innerHTML = `
     <div class="metric-card">
       <div class="metric-label">Total Website Dibuka</div>
-      <div class="metric-val">${totalVisits.toLocaleString('id-ID')}</div>
-      <div class="metric-sub">Total sesi kunjungan dari ${filtered.length} bulan data</div>
+      <div class="metric-val" id="count-visits">0</div>
+      ${visitsDelta.html ? visitsDelta.html : `<div class="metric-sub">Total sesi kunjungan dari ${filtered.length} bulan data</div>`}
     </div>
     <div class="metric-card">
       <div class="metric-label">Peminat via WhatsApp</div>
-      <div class="metric-val">${fmtNum(totalWA)}</div>
-      <div class="metric-sub">Jumlah klik tombol chat WA (Calon Leads)</div>
+      <div class="metric-val" id="count-wa">0</div>
+      ${waDelta.html ? waDelta.html : `<div class="metric-sub">Jumlah klik tombol chat WA (Calon Leads)</div>`}
     </div>
     <div class="metric-card">
       <div class="metric-label">Tingkat Ketertarikan</div>
-      <div class="metric-val">${fmtPct(avgEngage)}</div>
-      <div class="metric-sub">Pengunjung yang benar-benar membaca & tidak langsung kabur</div>
+      <div class="metric-val" id="count-engage">0%</div>
+      ${engageDelta.html ? engageDelta.html : `<div class="metric-sub">Pengunjung membaca page & tidak langsung kabur</div>`}
     </div>
     <div class="metric-card">
       <div class="metric-label">Asal Negara Terbanyak</div>
-      <div class="metric-val" style="font-size: 22px; padding-top: 4px;">🌍 ${topGlobalCountries}</div>
+      <div class="metric-val" style="font-size: 20px; padding-top: 6px; font-weight:700; color:var(--accent)">${topGlobalCountries}</div>
       <div class="metric-sub">2 Negara dengan traffic paling dominan</div>
     </div>
   `;
 
-  // 2. RENDER DETAILED CARDS PER-WEBSITE
+  // Trigger Rolling Animations
+  animateValue(document.getElementById('count-visits'), 0, totalVisits, 800);
+  animateValue(document.getElementById('count-wa'), 0, totalWA, 800);
+  animateValue(document.getElementById('count-engage'), 0, avgEngage, 800, true);
+
   const sites = allSites();
   document.getElementById('site-cards').innerHTML = sites.map(site => {
     const rows = filtered.filter(d => d.site === site).sort((a,b) => b.y-a.y || b.m-a.m);
@@ -591,17 +657,15 @@ function renderOverview() {
     `;
   }).join('');
 
-  // 3. RE-RENDER GRAFIK BAWAHAN
   const siteTotals = sites.map(s => sumOrNull(filtered.filter(d => d.site===s).map(d=>d.total)) || 0);
   makeLegend('leg-visits', sites);
   destroyChart('visits');
   charts['visits'] = new Chart(document.getElementById('ch-visits'), {
     type: 'bar',
     data: { labels: sites.map(s => s.replace('.com','').replace('.co.id','')), datasets: [{ data: siteTotals, backgroundColor: COLORS.slice(0, sites.length), borderRadius: 6 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: indonesianTooltipConfig }, scales: { y: { ticks: { color: txtColor, callback: v => v>=1000 ? (v/1000)+'k' : v }, grid: { color: 'rgba(128,128,128,0.08)' } }, x: { ticks: { color: txtColor }, grid: { display: false } } } }
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: indonesianTooltipConfig }, scales: { y: { ticks: { color: txtColor, callback: v => v celestial && v>=1000 ? (v/1000)+'k' : v }, grid: { color: gridColor } }, x: { ticks: { color: txtColor }, grid: { display: false } } } }
   });
 
-  // DEKLARASI ULANG VARIABLE YANG SEMPAT HILANG DI SINI
   const siteEngage = sites.map(s => { const v = avgOrNull(filtered.filter(d=>d.site===s).map(d=>d.engage)); return v === null ? 0 : +v.toFixed(1); });
   const siteBounce = sites.map(s => { const v = avgOrNull(filtered.filter(d=>d.site===s).map(d=>d.bounce)); return v === null ? 0 : +v.toFixed(1); });
 
@@ -609,7 +673,7 @@ function renderOverview() {
   charts['engbounce'] = new Chart(document.getElementById('ch-engbounce'), {
     type: 'bar',
     data: { labels: sites.map(s => s.replace('.com','').replace('.co.id','')), datasets: [{ label: 'Tertarik (%): Membaca Page', data: siteEngage, backgroundColor: '#2a78d6', borderRadius: 5 }, { label: 'Kabur (%): Langsung Keluar', data: siteBounce, backgroundColor: '#e34948', borderRadius: 5 }] },
-    options: { responsive: true, maintainAspectRatio: false, scales: { y: { ticks: { color: txtColor, callback: v => v+'%' }, grid: { color: 'rgba(128,128,128,0.08)' }, min: 0, max: 100 }, x: { ticks: { color: txtColor }, grid: { display: false } } } }
+    options: { responsive: true, maintainAspectRatio: false, scales: { y: { ticks: { color: txtColor, callback: v => v+'%' }, grid: { color: gridColor }, min: 0, max: 100 }, x: { ticks: { color: txtColor }, grid: { display: false } } } }
   });
 
   const siteWA = sites.map(s => sumOrNull(filtered.filter(d=>d.site===s).map(d=>d.wa)) || 0);
@@ -618,13 +682,14 @@ function renderOverview() {
   charts['wa-bar'] = new Chart(document.getElementById('ch-wa-bar'), {
     type: 'bar',
     data: { labels: sites.map(s => s.replace('.com','').replace('.co.id','')), datasets: [{ data: siteWA, backgroundColor: COLORS.slice(0, sites.length), borderRadius: 6 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: indonesianTooltipConfig }, scales: { y: { ticks: { color: txtColor }, grid: { color: 'rgba(128,128,128,0.08)' } }, x: { ticks: { color: txtColor }, grid: { display: false } } } }
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: indonesianTooltipConfig }, scales: { y: { ticks: { color: txtColor }, grid: { color: gridColor } }, x: { ticks: { color: txtColor }, grid: { display: false } } } }
   });
 }
 
 function renderTrends() {
   const metric = document.getElementById('f-metric').value;
   const txtColor = getChartTextColor();
+  const gridColor = getChartGridColor();
   const labels = { total: 'Total Kunjungan', daily: 'Pengunjung / Hari', engage: 'Engagement Rate (%)', bounce: 'Bounce Rate (%)', events: 'Event Count', wa: 'Whatsapp Leads' };
   document.getElementById('trend-title').textContent = 'Pola Arus Grafis ' + labels[metric];
 
@@ -656,13 +721,14 @@ function renderTrends() {
   charts['trend'] = new Chart(document.getElementById('ch-trend'), {
     type: 'line',
     data: { labels: periodLabels, datasets },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: indonesianTooltipConfig }, scales: { y: { ticks: { color: txtColor }, grid: { color: 'rgba(128,128,128,0.08)' } }, x: { ticks: { color: txtColor }, grid: { display: false } } } }
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: indonesianTooltipConfig }, scales: { y: { ticks: { color: txtColor }, grid: { color: gridColor } }, x: { ticks: { color: txtColor }, grid: { display: false } } } }
   });
 }
 
 function renderCompare() {
   const sites = allSites();
   const txtColor = getChartTextColor();
+  const gridColor = getChartGridColor();
   const siteEngage = sites.map(s => { const v = avgOrNull(filtered.filter(d=>d.site===s).map(d=>d.engage)); return v === null ? 0 : +v.toFixed(1); });
   const siteBounce = sites.map(s => { const v = avgOrNull(filtered.filter(d=>d.site===s).map(d=>d.bounce)); return v === null ? 0 : +v.toFixed(1); });
   const siteEvents = sites.map(s => sumOrNull(filtered.filter(d=>d.site===s).map(d=>d.events)) || 0);
@@ -672,14 +738,14 @@ function renderCompare() {
   charts['cmp-engage'] = new Chart(document.getElementById('ch-cmp-engage'), {
     type: 'bar', indexAxis: 'y',
     data: { labels, datasets: [{ data: siteEngage, backgroundColor: '#2a78d6', borderRadius: 4 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: txtColor, callback: v => v+'%' }, grid: { color: 'rgba(128,128,128,0.08)' }, min: 0, max: 100 }, y: { ticks: { color: txtColor }, grid: { display: false } } } }
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: txtColor, callback: v => v+'%' }, grid: { color: gridColor }, min: 0, max: 100 }, y: { ticks: { color: txtColor }, grid: { display: false } } } }
   });
 
   destroyChart('cmp-bounce');
   charts['cmp-bounce'] = new Chart(document.getElementById('ch-cmp-bounce'), {
     type: 'bar', indexAxis: 'y',
     data: { labels, datasets: [{ data: siteBounce, backgroundColor: '#e34948', borderRadius: 4 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: txtColor, callback: v => v+'%' }, grid: { color: 'rgba(128,128,128,0.08)' }, min: 0, max: 100 }, y: { ticks: { color: txtColor }, grid: { display: false } } } }
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { x: { ticks: { color: txtColor, callback: v => v+'%' }, grid: { color: gridColor }, min: 0, max: 100 }, y: { ticks: { color: txtColor }, grid: { display: false } } } }
   });
 
   makeLegend('leg-events', sites);
@@ -687,7 +753,7 @@ function renderCompare() {
   charts['events'] = new Chart(document.getElementById('ch-events'), {
     type: 'bar',
     data: { labels, datasets: [{ data: siteEvents, backgroundColor: COLORS.slice(0, sites.length), borderRadius: 5 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: indonesianTooltipConfig }, scales: { y: { ticks: { color: txtColor, callback: v => v>1000 ? (v/1000)+'k' : v }, grid: { color: 'rgba(128,128,128,0.08)' } }, x: { ticks: { color: txtColor }, grid: { display: false } } } }
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: indonesianTooltipConfig }, scales: { y: { ticks: { color: txtColor, callback: v => v>1000 ? (v/1000)+'k' : v }, grid: { color: gridColor } }, x: { ticks: { color: txtColor }, grid: { display: false } } } }
   });
 }
 
