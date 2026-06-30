@@ -239,6 +239,33 @@
     .card-header-flex .btn { width: 100%; }
     table { min-width: 720px; }
   }
+
+.info-box ul {
+    list-style: none;
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 8px 20px;
+  }
+  
+  .info-box li {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.5;
+    padding-left: 14px;
+    position: relative;
+    
+    /* Mencegah teks meluap di mobile */
+    white-space: normal;       
+    word-wrap: break-word;     
+    overflow-wrap: break-word; 
+  }
+  
+  .info-box li b {
+    font-weight: 600;
+    color: var(--text);
+    /* Membuat label metrik otomatis turun ke bawah jika layar terlalu sempit */
+    display: inline-block; 
+  }
 </style>
 </head>
 <body>
