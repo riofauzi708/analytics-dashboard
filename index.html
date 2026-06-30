@@ -142,10 +142,27 @@
 
   .info-box { background: var(--accent-light); border: 1px solid rgba(42, 120, 214, 0.12); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1.5rem; }
   .info-box h3 { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
-  .info-box ul { list-style: none; display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 8px 20px; }
-  .info-box li { font-size: 13px; color: var(--text2); line-height: 1.5; padding-left: 14px; position: relative; }
-  .info-box li::before { content: "•"; position: absolute; left: 0; color: var(--accent); font-weight: bold; }
   
+  /* Pengaturan Utama Info Box agar Responsif */
+  .info-box ul { 
+    list-style: none; 
+    display: grid; 
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); /* Diperkecil dari 280px agar pas di layar kecil */
+    gap: 12px 20px; 
+  }
+  .info-box li { 
+    font-size: 13px; 
+    color: var(--text2); 
+    line-height: 1.5; 
+    padding-left: 14px; 
+    position: relative; 
+    white-space: normal;       
+    word-wrap: break-word;     
+    overflow-wrap: break-word;
+  }
+  .info-box li::before { content: "•"; position: absolute; left: 0; color: var(--accent); font-weight: bold; }
+  .info-box li b { font-weight: 600; color: var(--text); display: inline-block; }
+
   .notes-banner { background: rgba(237, 161, 0, 0.08); border: 1px solid rgba(237, 161, 0, 0.15); border-radius: var(--radius); padding: 1rem 1.25rem; margin-bottom: 1.5rem; }
   .notes-banner-item { font-size: 13px; color: var(--text2); line-height: 1.5; display: flex; gap: 8px; }
   .notes-banner-item:not(:last-child) { margin-bottom: 6px; }
@@ -171,7 +188,7 @@
     .navbar-row { height: 56px; padding: 0 1rem; position: relative; }
     .nav-toggle { display: flex; order: 3; }
     .navbar-right { margin-left: initial; gap: 8px; order: 2; }
-    .last-updated-text { display: none; } /* Tersembunyi di mobile agar menghemat tempat */
+    .last-updated-text { display: none; }
     
     .navbar-menu { 
       display: none; 
@@ -189,11 +206,10 @@
     .navbar-menu.open { display: flex; }
     .tab { width: 100%; justify-content: flex-start; height: 42px; padding: 0 12px; }
 
-    /* Update Filter Mobile: Dibuat Jauh Lebih Kecil & Tidak Memenuhi Layar */
     .filter-wrapper { top: 56px; padding: 0.5rem 0; }
     .filter-bar { 
       display: grid; 
-      grid-template-columns: repeat(3, 1fr); /* 3 Kolom sejajar agar hemat baris */
+      grid-template-columns: repeat(3, 1fr); 
       gap: 8px; 
       padding: 0.75rem; 
       border-radius: 8px;
@@ -202,7 +218,7 @@
     .filter-bar label { font-size: 10px; letter-spacing: 0; }
     
     select, .search-input { 
-      height: 32px; /* Diperkecil dari 40px */
+      height: 32px; 
       font-size: 12px; 
       padding: 0 8px; 
       border-radius: 6px;
@@ -212,7 +228,7 @@
     }
     
     .filter-bar .btn-danger-outline { 
-      grid-column: span 3; /* Tombol reset di baris bawah tipis */
+      grid-column: span 3; 
       width: 100%; 
       height: 30px; 
       font-size: 12px;
@@ -227,44 +243,19 @@
     .metric-val { font-size: 22px; }
     .card { padding: 1rem; }
     .chart-wrap { height: 210px !important; }
+    
+    /* Paksa 1 kolom penuh di mobile grid info-box */
+    .info-box ul { grid-template-columns: 1fr; gap: 10px; }
   }
 
   @media (max-width: 480px) {
-    /* Khusus layar ultra-kecil, jadikan 2 kolom dropdown + 1 baris reset */
     .filter-bar { grid-template-columns: repeat(2, 1fr); }
-    .filter-bar > div:nth-child(1) { grid-column: span 2; } /* Domain penuh di atas */
+    .filter-bar > div:nth-child(1) { grid-column: span 2; } 
     .filter-bar .btn-danger-outline { grid-column: span 2; }
     .grid4 { grid-template-columns: 1fr; }
     .card-header-flex { flex-direction: column; align-items: stretch; gap: 10px; }
     .card-header-flex .btn { width: 100%; }
     table { min-width: 720px; }
-  }
-
-.info-box ul {
-    list-style: none;
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-    gap: 8px 20px;
-  }
-  
-  .info-box li {
-    font-size: 13px;
-    color: var(--text2);
-    line-height: 1.5;
-    padding-left: 14px;
-    position: relative;
-    
-    /* Mencegah teks meluap di mobile */
-    white-space: normal;       
-    word-wrap: break-word;     
-    overflow-wrap: break-word; 
-  }
-  
-  .info-box li b {
-    font-weight: 600;
-    color: var(--text);
-    /* Membuat label metrik otomatis turun ke bawah jika layar terlalu sempit */
-    display: inline-block; 
   }
 </style>
 </head>
@@ -870,7 +861,7 @@ function renderCompare() {
 
 function renderTable() {
   const sorted = [...filtered].sort((a,b) => b.y-a.y || b.m-a.m || a.site.localeCompare(b.site));
-  if (!sorted.length) { document.getElementById('tbl-wrap').innerHTML = '<div style="padding:3rem;text-align:center;color:var(--text3);">Tidak ada data yang ditemukan.</div>'; return; }
+  if (!sorted.length) { document.getElementById('tbl-wrap').innerHTML = '<div style="padding:3rem;text-align:center;color:var(--text3);;">Tidak ada data yang ditemukan.</div>'; return; }
   
   document.getElementById('tbl-wrap').innerHTML = `
     <table>
