@@ -509,14 +509,51 @@ function renderOverview() {
   const avgBounce = avgOrNull(filtered.map(d=>d.bounce));
   const txtColor = getChartTextColor();
 
+  // 1. HITUNG TOP 2 COUNTRIES SECARA GLOBAL AGREGASI
+  const countryCounts = {};
+  filtered.forEach(d => {
+    if (d.countries) {
+      const list = d.countries.split(/[\s,]+/);
+      list.forEach(c => {
+        const clean = c.trim().toUpperCase();
+        if (clean && clean !== '-' && clean !== 'N/A') {
+          countryCounts[clean] = (countryCounts[clean] || 0) + 1;
+        }
+      });
+    }
+  });
+  
+  const topGlobalCountries = Object.entries(countryCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 2)
+    .map(entry => entry[0])
+    .join(', ') || '-';
+
+  // RENDER 4 KARTU UTAMA ATAS (Bahasanya sudah diperbaiki agar awam-friendly)
   document.getElementById('ov-metrics').innerHTML = `
-    <div class="metric-card"><div class="metric-label">Total Kunjungan Sesi</div><div class="metric-val">${totalVisits.toLocaleString('id-ID')}</div><div class="metric-sub">Terfilter ${filtered.length} arsip</div></div>
-    <div class="metric-card"><div class="metric-label">Konversi Leads WA</div><div class="metric-val">${fmtNum(totalWA)}</div><div class="metric-sub">Kontak Terhitung</div></div>
-    <div class="metric-card"><div class="metric-label">Rata-rata Keterikatan</div><div class="metric-val">${fmtPct(avgEngage)}</div><div class="metric-sub">Rasio Interaksi</div></div>
-    <div class="metric-card"><div class="metric-label">Rata-rata Rasio Pentalan</div><div class="metric-val">${fmtPct(avgBounce)}</div><div class="metric-sub">Bounce Rate Global</div></div>
+    <div class="metric-card">
+      <div class="metric-label">Total Website Dibuka</div>
+      <div class="metric-val">${totalVisits.toLocaleString('id-ID')}</div>
+      <div class="metric-sub">Total sesi kunjungan dari ${filtered.length} bulan data</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Peminat via WhatsApp</div>
+      <div class="metric-val">${fmtNum(totalWA)}</div>
+      <div class="metric-sub">Jumlah klik tombol chat WA (Calon Leads)</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Tingkat Ketertarikan</div>
+      <div class="metric-val">${fmtPct(avgEngage)}</div>
+      <div class="metric-sub">Pengunjung yang benar-benar membaca & tidak langsung kabur</div>
+    </div>
+    <div class="metric-card">
+      <div class="metric-label">Asal Negara Terbanyak</div>
+      <div class="metric-val" style="font-size: 22px; padding-top: 4px;">🌍 ${topGlobalCountries}</div>
+      <div class="metric-sub">2 Negara dengan traffic paling dominan</div>
+    </div>
   `;
 
-  // Render Per-Website Detailed Cards
+  // 2. RENDER DETAILED CARDS PER-WEBSITE
   const sites = allSites();
   document.getElementById('site-cards').innerHTML = sites.map(site => {
     const rows = filtered.filter(d => d.site === site).sort((a,b) => b.y-a.y || b.m-a.m);
@@ -524,20 +561,37 @@ function renderOverview() {
     const r = rows[0];
     const pLabel = rows.length > 1 ? `${MONTHS[rows[rows.length-1].m]} ${rows[rows.length-1].y} - ${MONTHS[r.m]} ${r.y}` : `${MONTHS_FULL[r.m]} ${r.y}`;
     
+    const siteCountryCounts = {};
+    rows.forEach(d => {
+      if (d.countries) {
+        d.countries.split(/[\s,]+/).forEach(c => {
+          const clean = c.trim().toUpperCase();
+          if (clean && clean !== '-' && clean !== 'N/A') {
+            siteCountryCounts[clean] = (siteCountryCounts[clean] || 0) + 1;
+          }
+        });
+      }
+    });
+    const topSiteCountries = Object.entries(siteCountryCounts)
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 2)
+      .map(entry => entry[0])
+      .join(', ') || '-';
+
     return `
       <div class="site-card">
         <h3>${site}</h3>
         <div class="site-period">${pLabel}</div>
-        <div class="site-stat-row"><span class="site-stat-label">Pengunjung / Hari</span><span class="site-stat-val">${fmtNum(rows.length > 1 ? Math.round(avgOrNull(rows.map(x=>x.daily))) : r.daily)}</span></div>
-        <div class="site-stat-row"><span class="site-stat-label">Total Kunjungan</span><span class="site-stat-val">${fmtNum(sumOrNull(rows.map(x=>x.total)))}</span></div>
-        <div class="site-stat-row"><span class="site-stat-label">Engagement Rate</span><span class="site-stat-val">${fmtPct(avgOrNull(rows.map(x=>x.engage)))}</span></div>
-        <div class="site-stat-row"><span class="site-stat-label">Whatsapp Leads</span><span class="site-stat-val">${fmtNum(sumOrNull(rows.map(x=>x.wa)))}</span></div>
-        <div class="site-stat-row"><span class="site-stat-label">Top Geo Country</span><span class="site-stat-val countries">${r.countries || '-'}</span></div>
+        <div class="site-stat-row"><span class="site-stat-label">Rata-rata Orang/Hari</span><span class="site-stat-val">${fmtNum(rows.length > 1 ? Math.round(avgOrNull(rows.map(x=>x.daily))) : r.daily)}</span></div>
+        <div class="site-stat-row"><span class="site-stat-label">Total Dibuka (Sesi)</span><span class="site-stat-val">${fmtNum(sumOrNull(rows.map(x=>x.total)))}</span></div>
+        <div class="site-stat-row"><span class="site-stat-label">Persentase Tertarik</span><span class="site-stat-val">${fmtPct(avgOrNull(rows.map(x=>x.engage)))}</span></div>
+        <div class="site-stat-row"><span class="site-stat-label">Klik Chat WhatsApp</span><span class="site-stat-val">${fmtNum(sumOrNull(rows.map(x=>x.wa)))}</span></div>
+        <div class="site-stat-row"><span class="site-stat-label">Target Pasar Utama</span><span class="site-stat-val countries" style="color: var(--accent); font-weight: 600;">${topSiteCountries}</span></div>
       </div>
     `;
   }).join('');
 
-  // Total Visits Chart
+  // 3. RE-RENDER GRAFIK BAWAHAN
   const siteTotals = sites.map(s => sumOrNull(filtered.filter(d => d.site===s).map(d=>d.total)) || 0);
   makeLegend('leg-visits', sites);
   destroyChart('visits');
@@ -547,17 +601,14 @@ function renderOverview() {
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: indonesianTooltipConfig }, scales: { y: { ticks: { color: txtColor, callback: v => v>=1000 ? (v/1000)+'k' : v }, grid: { color: 'rgba(128,128,128,0.08)' } }, x: { ticks: { color: txtColor }, grid: { display: false } } } }
   });
 
-  // Engagement vs Bounce Chart
-  const siteEngage = sites.map(s => { const v = avgOrNull(filtered.filter(d=>d.site===s).map(d=>d.engage)); return v === null ? 0 : +v.toFixed(1); });
-  const siteBounce = sites.map(s => { const v = avgOrNull(filtered.filter(d=>d.site===s).map(d=>d.bounce)); return v === null ? 0 : +v.toFixed(1); });
+  // Mengubah label grafik legand agar lebih ramah awam
   destroyChart('engbounce');
   charts['engbounce'] = new Chart(document.getElementById('ch-engbounce'), {
     type: 'bar',
-    data: { labels: sites.map(s => s.replace('.com','').replace('.co.id','')), datasets: [{ label: 'Engagement', data: siteEngage, backgroundColor: '#2a78d6', borderRadius: 5 }, { label: 'Bounce', data: siteBounce, backgroundColor: '#e34948', borderRadius: 5 }] },
+    data: { labels: sites.map(s => s.replace('.com','').replace('.co.id','')), datasets: [{ label: 'Tertarik (%): Membaca Page', data: siteEngage, backgroundColor: '#2a78d6', borderRadius: 5 }, { label: 'Kabur (%): Langsung Keluar', data: siteBounce, backgroundColor: '#e34948', borderRadius: 5 }] },
     options: { responsive: true, maintainAspectRatio: false, scales: { y: { ticks: { color: txtColor, callback: v => v+'%' }, grid: { color: 'rgba(128,128,128,0.08)' }, min: 0, max: 100 }, x: { ticks: { color: txtColor }, grid: { display: false } } } }
   });
 
-  // Whatsapp Leads Bar Chart
   const siteWA = sites.map(s => sumOrNull(filtered.filter(d=>d.site===s).map(d=>d.wa)) || 0);
   makeLegend('leg-wa', sites);
   destroyChart('wa-bar');
