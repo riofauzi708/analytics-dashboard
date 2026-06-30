@@ -334,8 +334,6 @@ function toggleTheme() {
   document.documentElement.setAttribute('data-theme', target);
   localStorage.setItem('theme', target);
   document.getElementById('theme-btn').textContent = target === 'dark' ? 'Light Mode' : 'Dark Mode';
-  
-  // Re-apply filters to force redraw charts with newly theme colors
   if (allData.length) applyFilters();
 }
 
@@ -396,7 +394,6 @@ function sumOrNull(arr) {
   return vals.length ? vals.reduce((a,b)=>a+b,0) : null;
 }
 
-// Counter Roller Engine
 function animateValue(obj, start, end, duration, isPercentage = false) {
   if (!obj) return;
   if (end === null || end === undefined || isNaN(end)) {
@@ -520,7 +517,6 @@ function makeLegend(elId, sites) {
   ).join('');
 }
 
-// MoM Delta Computation Engine
 function calculateDelta(currentVal, metricName) {
   const siteFilter = document.getElementById('f-site').value;
   const yearFilter = document.getElementById('f-year').value;
@@ -615,7 +611,6 @@ function renderOverview() {
     </div>
   `;
 
-  // Trigger Rolling Animations
   animateValue(document.getElementById('count-visits'), 0, totalVisits, 800);
   animateValue(document.getElementById('count-wa'), 0, totalWA, 800);
   animateValue(document.getElementById('count-engage'), 0, avgEngage, 800, true);
@@ -663,7 +658,7 @@ function renderOverview() {
   charts['visits'] = new Chart(document.getElementById('ch-visits'), {
     type: 'bar',
     data: { labels: sites.map(s => s.replace('.com','').replace('.co.id','')), datasets: [{ data: siteTotals, backgroundColor: COLORS.slice(0, sites.length), borderRadius: 6 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: indonesianTooltipConfig }, scales: { y: { ticks: { color: txtColor, callback: v => v celestial && v>=1000 ? (v/1000)+'k' : v }, grid: { color: gridColor } }, x: { ticks: { color: txtColor }, grid: { display: false } } } }
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: indonesianTooltipConfig }, scales: { y: { ticks: { color: txtColor, callback: v => (v !== null && v >= 1000) ? (v/1000)+'k' : v }, grid: { color: gridColor } }, x: { ticks: { color: txtColor }, grid: { display: false } } } }
   });
 
   const siteEngage = sites.map(s => { const v = avgOrNull(filtered.filter(d=>d.site===s).map(d=>d.engage)); return v === null ? 0 : +v.toFixed(1); });
