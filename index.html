@@ -48,14 +48,15 @@
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; transition: background 0.3s ease, color 0.3s ease; }
   
   .navbar { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 200; transition: background 0.3s ease, border-color 0.3s ease; }
-  .navbar-row { padding: 0 2rem; height: 60px; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
-  .navbar-brand { font-size: 17px; font-weight: 600; letter-spacing: -0.3px; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
-  .navbar-right { display: flex; align-items: center; gap: 15px; }
-  .navbar-right .last-updated-text { font-size: 12px; color: var(--text3); font-variant-numeric: tabular-nums; white-space: nowrap; }
-  .navbar-menu { display: flex; gap: 4px; padding: 0 1.5rem; border-top: 1px solid var(--border); overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; }
+  .navbar-row { max-width: 1280px; margin: 0 auto; padding: 0 2rem; height: 64px; display: flex; align-items: center; gap: 28px; }
+  .navbar-brand { font-size: 16px; font-weight: 600; letter-spacing: -0.3px; display: flex; align-items: center; gap: 8px; white-space: nowrap; flex-shrink: 0; }
+  .navbar-menu { display: flex; align-items: center; gap: 4px; flex: 1; overflow-x: auto; -webkit-overflow-scrolling: touch; scrollbar-width: none; height: 100%; }
   .navbar-menu::-webkit-scrollbar { display: none; }
+  .navbar-menu-divider { width: 1px; height: 22px; background: var(--border); margin: 0 6px; flex-shrink: 0; }
+  .last-updated-text { font-size: 12px; color: var(--text3); font-variant-numeric: tabular-nums; white-space: nowrap; flex-shrink: 0; margin-right: 4px; }
 
-  .theme-toggle { background: var(--surface2); border: 1px solid var(--border); padding: 0 14px; height: 36px; border-radius: 18px; cursor: pointer; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text2); display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease; flex-shrink: 0; }
+  .navbar-actions { display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+  .theme-toggle { background: var(--surface2); border: 1px solid var(--border); padding: 0 14px; height: 34px; border-radius: 17px; cursor: pointer; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; color: var(--text2); display: flex; align-items: center; justify-content: center; gap: 6px; transition: all 0.2s ease; flex-shrink: 0; }
   .theme-toggle:hover { border-color: var(--text3); background: var(--surface); color: var(--text); }
 
   .nav-toggle { display: none; flex-direction: column; justify-content: center; gap: 4px; width: 36px; height: 36px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface2); cursor: pointer; flex-shrink: 0; }
@@ -102,7 +103,7 @@
   .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); font-weight: 500; }
   .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
   
-  .tab { padding: 14px 18px; font-size: 13.5px; font-weight: 500; cursor: pointer; border: none; background: none; color: var(--text3); border-bottom: 2px solid transparent; margin-bottom: -1px; transition: all 0.2s ease; white-space: nowrap; flex-shrink: 0; }
+  .tab { height: 100%; display: flex; align-items: center; padding: 0 16px; font-size: 13.5px; font-weight: 500; cursor: pointer; border: none; background: none; color: var(--text3); border-bottom: 2px solid transparent; transition: all 0.2s ease; white-space: nowrap; flex-shrink: 0; }
   .tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
   .tab:hover:not(.active) { color: var(--text); }
   
@@ -142,7 +143,9 @@
   .site-stat-row:last-child { border-bottom: none; }
   .site-stat-label { font-size: 13px; color: var(--text2); }
   .site-stat-val { font-size: 15px; font-weight: 600; color: var(--text); }
-  .site-stat-val.countries { font-size: 12px; font-weight: 500; color: var(--text2); max-width: 60%; text-align: right; word-break: break-all; }
+  .site-stat-val.countries { font-size: 12px; font-weight: 600; color: var(--accent); max-width: 60%; text-align: right; white-space: normal; overflow-wrap: normal; word-break: normal; line-height: 1.4; }
+  .site-stat-row.row-countries { flex-wrap: wrap; }
+  .site-stat-row.row-countries .site-stat-val.countries { max-width: 100%; text-align: left; flex-basis: 100%; margin-top: 2px; }
 
   .info-box { background: var(--accent-light); border: 1px solid rgba(42, 120, 214, 0.15); border-radius: var(--radius); padding: 1.5rem; margin-bottom: 1.5rem; }
   .info-box h3 { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
@@ -167,13 +170,14 @@
 
   /* Mobile besar / tablet kecil */
   @media (max-width: 768px) {
-    .navbar-row { padding: 0 1.25rem; height: 56px; }
+    .navbar-row { padding: 0 1.25rem; height: 56px; position: relative; }
     .navbar-brand { font-size: 15px; }
     .nav-toggle { display: flex; }
-    .navbar-right .last-updated-text { display: none; }
-    .navbar-menu { display: none; flex-direction: column; gap: 0; padding: 6px 1rem 10px; border-top: 1px solid var(--border); }
+    .last-updated-text { display: none; }
+    .navbar-menu { display: none; position: absolute; top: 56px; left: 0; right: 0; flex-direction: column; align-items: stretch; gap: 0; padding: 6px 1rem 10px; background: var(--surface); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); box-shadow: var(--shadow-hover); height: auto; }
     .navbar-menu.open { display: flex; }
-    .tab { width: 100%; text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--border); border-left: 2px solid transparent; margin-bottom: 0; }
+    .navbar-menu-divider { display: none; }
+    .tab { width: 100%; height: auto; text-align: left; padding: 12px 10px; border-bottom: 1px solid var(--border); border-left: 2px solid transparent; }
     .tab.active { border-bottom-color: var(--border); border-left-color: var(--accent); background: var(--accent-light); }
     .tab:last-child { border-bottom: none; }
     .filter-bar { padding: 1rem; gap: 10px; }
@@ -201,7 +205,7 @@
     .card-header-flex { flex-direction: column; align-items: stretch; }
     .card-header-flex .btn { width: 100%; }
     table { min-width: 720px; }
-    .site-stat-val.countries { max-width: 50%; }
+    .site-stat-val.countries { max-width: 100%; }
   }
 </style>
 </head>
@@ -212,21 +216,24 @@
     <div class="navbar-brand">
       <span aria-hidden="true">📊</span> Enterprise Web Analytics
     </div>
-    <button class="nav-toggle" id="nav-toggle-btn" onclick="toggleNavMenu()" aria-label="Buka menu navigasi" aria-expanded="false">
-      <span class="nav-toggle-bar"></span>
-      <span class="nav-toggle-bar"></span>
-      <span class="nav-toggle-bar"></span>
-    </button>
-    <div class="navbar-right">
+
+    <div class="navbar-menu" id="navbar-menu">
+      <button class="tab active" onclick="switchTab('overview')">Overview</button>
+      <button class="tab" onclick="switchTab('trends')">Monthly Trends</button>
+      <button class="tab" onclick="switchTab('compare')">Comparison</button>
+      <button class="tab" onclick="switchTab('table')">Data Detail</button>
+      <div class="navbar-menu-divider"></div>
       <span id="last-updated" class="last-updated-text">Memuat data...</span>
-      <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Ubah tema">🌙 <span class="theme-toggle-label">Dark Mode</span></button>
     </div>
-  </div>
-  <div class="navbar-menu" id="navbar-menu">
-    <button class="tab active" onclick="switchTab('overview')">Ringkasan</button>
-    <button class="tab" onclick="switchTab('trends')">Tren Bulanan</button>
-    <button class="tab" onclick="switchTab('compare')">Perbandingan</button>
-    <button class="tab" onclick="switchTab('table')">Data Lengkap</button>
+
+    <div class="navbar-actions">
+      <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Ubah tema">🌙 <span class="theme-toggle-label">Dark Mode</span></button>
+      <button class="nav-toggle" id="nav-toggle-btn" onclick="toggleNavMenu()" aria-label="Buka menu navigasi" aria-expanded="false">
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+        <span class="nav-toggle-bar"></span>
+      </button>
+    </div>
   </div>
 </nav>
 
@@ -242,19 +249,19 @@
     <div class="filter-wrapper">
       <div class="filter-bar">
         <div>
-          <label>Situs Web</label>
+          <label>Website</label>
           <select id="f-site" onchange="applyFilters()">
             <option value="">Semua Website</option>
           </select>
         </div>
         <div>
-          <label>Tahun</label>
+          <label>Year</label>
           <select id="f-year" onchange="applyFilters()">
             <option value="">Semua Tahun</option>
           </select>
         </div>
         <div>
-          <label>Bulan</label>
+          <label>Month</label>
           <select id="f-month" onchange="applyFilters()">
             <option value="">Semua Bulan</option>
           </select>
@@ -267,34 +274,34 @@
       <div class="info-box">
         <h3>Glosarium Metrik</h3>
         <ul>
-          <li><b>Pengunjung / Hari:</b> Rata-rata jumlah pengunjung unik per hari dalam periode tertentu.</li>
-          <li><b>Engagement Rate:</b> Persentase sesi dengan interaksi aktif pengunjung pada halaman web.</li>
+          <li><b>Visitors/Day:</b> Rata-rata jumlah pengunjung unik per hari dalam periode yang dipilih.</li>
+          <li><b>Engagement Rate:</b> Persentase sesi dengan interaksi aktif pengunjung pada halaman website.</li>
           <li><b>Bounce Rate:</b> Persentase pengunjung yang keluar tanpa melakukan navigasi lanjutan.</li>
-          <li><b>Event Count:</b> Akumulasi jumlah aktivitas tercatat, seperti klik, scroll, dan trigger lainnya.</li>
-          <li><b>Whatsapp Leads:</b> Jumlah klik tombol WhatsApp yang berpotensi menjadi prospek penjualan.</li>
+          <li><b>Event Count:</b> Akumulasi aktivitas tercatat pada website, seperti klik, scroll, dan trigger lainnya.</li>
+          <li><b>WhatsApp Leads:</b> Jumlah klik tombol WhatsApp yang berpotensi menjadi prospek penjualan (sales lead).</li>
         </ul>
       </div>
 
       <div id="notes-banner-wrap"></div>
       <div class="grid4" id="ov-metrics"></div>
 
-      <h2 style="font-size:15px;font-weight:600;margin-bottom:14px;color:var(--text)">Ringkasan Performa per Situs Web</h2>
+      <h2 style="font-size:15px;font-weight:600;margin-bottom:14px;color:var(--text)">Ringkasan Performa per Website</h2>
       <div class="site-cards" id="site-cards"></div>
 
       <div class="grid2">
         <div class="card">
-          <h2>Distribusi Total Kunjungan Sesi</h2>
+          <h2>Distribusi Total Sesi Kunjungan</h2>
           <div class="legend" id="leg-visits"></div>
           <div class="chart-wrap" style="height:230px"><canvas id="ch-visits"></canvas></div>
         </div>
         <div class="card">
-          <h2>Perbandingan Engagement Rate dan Bounce Rate</h2>
+          <h2>Engagement Rate vs Bounce Rate</h2>
           <div class="legend"><span class="legend-item"><span class="legend-dot" style="background:#2a78d6"></span>Engagement</span><span class="legend-item"><span class="legend-dot" style="background:#e34948"></span>Bounce</span></div>
           <div class="chart-wrap" style="height:230px"><canvas id="ch-engbounce"></canvas></div>
         </div>
       </div>
       <div class="card section-full">
-        <h2>Konversi Prospek melalui WhatsApp</h2>
+        <h2>Konversi WhatsApp Leads</h2>
         <div class="legend" id="leg-wa"></div>
         <div class="chart-wrap" style="height:190px"><canvas id="ch-wa-bar"></canvas></div>
       </div>
@@ -324,16 +331,16 @@
     <div id="tab-compare" class="section">
       <div class="grid2">
         <div class="card">
-          <h2>Perbandingan Tingkat Engagement</h2>
+          <h2>Perbandingan Engagement Rate</h2>
           <div class="chart-wrap" style="height:260px"><canvas id="ch-cmp-engage"></canvas></div>
         </div>
         <div class="card">
-          <h2>Perbandingan Tingkat Bounce Rate</h2>
+          <h2>Perbandingan Bounce Rate</h2>
           <div class="chart-wrap" style="height:260px"><canvas id="ch-cmp-bounce"></canvas></div>
         </div>
       </div>
       <div class="card section-full">
-        <h2>Volume Aktivitas Event</h2>
+        <h2>Volume Event Activity</h2>
         <div class="legend" id="leg-events"></div>
         <div class="chart-wrap" style="height:230px"><canvas id="ch-events"></canvas></div>
       </div>
@@ -345,7 +352,7 @@
           <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:260px;">
             <input type="text" id="table-search" class="search-input" placeholder="Cari berdasarkan negara, domain, atau bulan..." onkeyup="liveSearchTable()">
           </div>
-          <button class="btn btn-accent" onclick="exportCSV()">Ekspor Data (CSV)</button>
+          <button class="btn btn-accent" onclick="exportCSV()">Export CSV</button>
         </div>
         <div class="table-wrap" id="tbl-wrap"></div>
       </div>
@@ -483,10 +490,10 @@ async function loadData() {
       fetch(SHEET_CSV + '&t=' + Date.now()),
       fetch(NOTES_CSV + '&t=' + Date.now()).catch(() => null)
     ]);
-    if (!res.ok) throw new Error('Tidak dapat memuat data dari sumber');
+    if (!res.ok) throw new Error('Tidak dapat memuat data — periksa koneksi sumber data');
     const text = await res.text();
     allData = processData(parseCSV(text));
-    if (!allData.length) throw new Error('Data tidak dapat diproses');
+    if (!allData.length) throw new Error('Format data tidak valid atau kosong');
 
     if (notesRes && notesRes.ok) {
       try { allNotes = processNotes(parseCSV(await notesRes.text())); } catch(e) { allNotes = []; }
@@ -649,22 +656,22 @@ function renderOverview() {
 
   document.getElementById('ov-metrics').innerHTML = `
     <div class="metric-card">
-      <div class="metric-label">Total Kunjungan Situs</div>
+      <div class="metric-label">Total Visitor Sessions</div>
       <div class="metric-val" id="count-visits">0</div>
       ${visitsDelta.html ? visitsDelta.html : `<div class="metric-sub">Total sesi kunjungan dari ${filtered.length} bulan data</div>`}
     </div>
     <div class="metric-card">
-      <div class="metric-label">Prospek via WhatsApp</div>
+      <div class="metric-label">WhatsApp Leads</div>
       <div class="metric-val" id="count-wa">0</div>
       ${waDelta.html ? waDelta.html : `<div class="metric-sub">Jumlah klik tombol WhatsApp (prospek)</div>`}
     </div>
     <div class="metric-card">
-      <div class="metric-label">Tingkat Engagement</div>
+      <div class="metric-label">Avg. Engagement Rate</div>
       <div class="metric-val" id="count-engage">0%</div>
       ${engageDelta.html ? engageDelta.html : `<div class="metric-sub">Rata-rata engagement rate pengunjung pada periode ini</div>`}
     </div>
     <div class="metric-card">
-      <div class="metric-label">Negara Asal Utama</div>
+      <div class="metric-label">Top Visitor Origin</div>
       <div class="metric-val" style="font-size: 20px; padding-top: 6px; font-weight:700; color:var(--accent)">${topGlobalCountries}</div>
       <div class="metric-sub">Dua negara dengan kontribusi traffic tertinggi</div>
     </div>
@@ -702,11 +709,11 @@ function renderOverview() {
       <div class="site-card">
         <h3>${site}</h3>
         <div class="site-period">${pLabel}</div>
-        <div class="site-stat-row"><span class="site-stat-label">Rata-rata Pengunjung/Hari</span><span class="site-stat-val">${fmtNum(rows.length > 1 ? Math.round(avgOrNull(rows.map(x=>x.daily))) : r.daily)}</span></div>
-        <div class="site-stat-row"><span class="site-stat-label">Total Kunjungan (Sesi)</span><span class="site-stat-val">${fmtNum(sumOrNull(rows.map(x=>x.total)))}</span></div>
+        <div class="site-stat-row"><span class="site-stat-label">Avg. Visitors/Day</span><span class="site-stat-val">${fmtNum(rows.length > 1 ? Math.round(avgOrNull(rows.map(x=>x.daily))) : r.daily)}</span></div>
+        <div class="site-stat-row"><span class="site-stat-label">Total Sessions</span><span class="site-stat-val">${fmtNum(sumOrNull(rows.map(x=>x.total)))}</span></div>
         <div class="site-stat-row"><span class="site-stat-label">Engagement Rate</span><span class="site-stat-val">${fmtPct(avgOrNull(rows.map(x=>x.engage)))}</span></div>
-        <div class="site-stat-row"><span class="site-stat-label">Klik WhatsApp</span><span class="site-stat-val">${fmtNum(sumOrNull(rows.map(x=>x.wa)))}</span></div>
-        <div class="site-stat-row"><span class="site-stat-label">Negara Asal Utama</span><span class="site-stat-val countries" style="color: var(--accent); font-weight: 600;">${topSiteCountries}</span></div>
+        <div class="site-stat-row"><span class="site-stat-label">WhatsApp Clicks</span><span class="site-stat-val">${fmtNum(sumOrNull(rows.map(x=>x.wa)))}</span></div>
+        <div class="site-stat-row row-countries"><span class="site-stat-label">Top Visitor Origin</span><span class="site-stat-val countries">${topSiteCountries}</span></div>
       </div>
     `;
   }).join('');
@@ -745,7 +752,7 @@ function renderTrends() {
   const txtColor = getChartTextColor();
   const gridColor = getChartGridColor();
   const labels = { total: 'Total Kunjungan', daily: 'Pengunjung / Hari', engage: 'Engagement Rate (%)', bounce: 'Bounce Rate (%)', events: 'Event Count', wa: 'Whatsapp Leads' };
-  document.getElementById('trend-title').textContent = 'Tren ' + labels[metric];
+  document.getElementById('trend-title').textContent = 'Tren: ' + labels[metric];
 
   const site = document.getElementById('f-site').value;
   const sites = site ? [site] : allSites();
@@ -813,11 +820,11 @@ function renderCompare() {
 
 function renderTable() {
   const sorted = [...filtered].sort((a,b) => b.y-a.y || b.m-a.m || a.site.localeCompare(b.site));
-  if (!sorted.length) { document.getElementById('tbl-wrap').innerHTML = '<div style="padding:3rem;text-align:center;color:var(--text3);">Tidak ada data yang ditemukan.</div>'; return; }
+  if (!sorted.length) { document.getElementById('tbl-wrap').innerHTML = '<div style="padding:3rem;text-align:center;color:var(--text3);">Tidak ada data yang ditemukan untuk filter ini.</div>'; return; }
   
   document.getElementById('tbl-wrap').innerHTML = `
     <table>
-      <thead><tr><th>Situs Web</th><th>Bulan</th><th>Tahun</th><th>Pengunjung/Hari</th><th>Total Kunjungan</th><th>Engagement</th><th>Bounce Rate</th><th>Total Event</th><th>Prospek WA</th><th>Negara Utama</th></tr></thead>
+      <thead><tr><th>Website</th><th>Bulan</th><th>Tahun</th><th>Visitors/Day</th><th>Total Sessions</th><th>Engagement</th><th>Bounce Rate</th><th>Total Events</th><th>WA Leads</th><th>Top Origin</th></tr></thead>
       <tbody id="analytics-table-body">${sorted.map(r => `<tr>
         <td><b>${r.site}</b></td>
         <td>${MONTHS_FULL[r.m]}</td>
