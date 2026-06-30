@@ -84,6 +84,12 @@
   .info-box li { font-size: 13px; color: #27500a; line-height: 1.6; margin-bottom: 6px; padding-left: 14px; position: relative; }
   .info-box li::before { content: "•"; position: absolute; left: 0; }
   .info-box li b { font-weight: 600; }
+
+  .notes-banner { background: #faeeda; border: 1px solid #fac775; border-radius: var(--radius); padding: 0.9rem 1.25rem; margin-bottom: 1.5rem; }
+  .notes-banner-item { font-size: 13px; color: #633806; line-height: 1.5; display: flex; gap: 8px; }
+  .notes-banner-item:not(:last-child) { margin-bottom: 6px; }
+  .notes-banner-item b { font-weight: 600; flex-shrink: 0; }
+  .na-val { color: var(--text3); font-weight: 500; font-style: italic; }
 </style>
 </head>
 <body>
@@ -138,10 +144,12 @@
           <li><b>Engagement Rate:</b> Persentase pengunjung yang benar-benar melakukan aktivitas atau membaca konten (bukan cuma numpang lewat). Semakin tinggi, semakin bagus.</li>
           <li><b>Bounce Rate:</b> Persentase orang yang langsung pergi setelah melihat satu halaman. (Kebalikan dari Engagement).</li>
           <li><b>Event Count:</b> Jumlah tindakan penting yang dilakukan pengunjung (seperti klik tombol, scroll sampai bawah, atau klik link). Ini tanda bahwa pengunjung aktif, bukan sekadar melihat.</li>
-          <li><b>WA:</b> Jumlah orang yang klik tombol WhatsApp untuk bertanya atau order.</li>
+          <li><b>Whatsapp Leads:</b> Jumlah orang yang klik tombol WhatsApp untuk bertanya atau order.</li>
           <li><b>Top Countries:</b> Negara asal pengunjung terbanyak ke website ini.</li>
         </ul>
       </div>
+
+      <div id="notes-banner-wrap"></div>
 
       <div class="grid4" id="ov-metrics"></div>
 
@@ -161,7 +169,7 @@
         </div>
       </div>
       <div class="card section-full">
-        <h2>WA Leads per website</h2>
+        <h2>Whatsapp Leads per website</h2>
         <div class="legend" id="leg-wa"></div>
         <div class="chart-wrap" style="height:180px"><canvas id="ch-wa-bar" role="img" aria-label="WA leads per website"></canvas></div>
       </div>
@@ -178,7 +186,7 @@
             <option value="engage">Engagement Rate (%)</option>
             <option value="bounce">Bounce Rate (%)</option>
             <option value="events">Event Count</option>
-            <option value="wa">WA Leads</option>
+            <option value="wa">Whatsapp Leads</option>
           </select>
         </div>
       </div>
@@ -221,12 +229,14 @@
 
 <script>
 const SHEET_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJE5nsXIAKWNSryELjTA9Ef6mUUU7RPyc6eb5K5xykkGZL4sZ_h3pX-f5Pbe_pAmF42nvSwoZe_Xqq/pub?gid=0&single=true&output=csv';
+const NOTES_CSV = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQJE5nsXIAKWNSryELjTA9Ef6mUUU7RPyc6eb5K5xykkGZL4sZ_h3pX-f5Pbe_pAmF42nvSwoZe_Xqq/pub?gid=1052640700&single=true&output=csv';
 const MONTHS = ['','Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','Nov','Des'];
 const MONTHS_FULL = ['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 const COLORS = ['#2a78d6','#1baf7a','#eda100','#4a3aa7','#e34948','#e87ba4','#eb6834','#008300','#73726c'];
 
 let allData = [];
 let filtered = [];
+let allNotes = [];
 let charts = {};
 
 function parseCSV(text) {
@@ -242,7 +252,13 @@ function parseCSV(text) {
   }).filter(r => r.site && r.month && r.year);
 }
 
-function toNum(v) { return parseFloat(v) || 0; }
+function toNum(v) {
+  if (v === undefined || v === null) return null;
+  const s = String(v).trim();
+  if (s === '' || s.toUpperCase() === 'N/A' || s.toUpperCase() === 'NA') return null;
+  const n = parseFloat(s);
+  return isNaN(n) ? null : n;
+}
 
 function processData(rows) {
   return rows.map(r => ({
@@ -255,17 +271,45 @@ function processData(rows) {
     bounce: toNum(r.bounce),
     events: toNum(r.events),
     wa: toNum(r.wa),
-    countries: r.countries || ''
+    countries: (r.countries && r.countries.toUpperCase() !== 'N/A') ? r.countries : ''
   }));
+}
+
+function processNotes(rows) {
+  return rows.map(r => ({ m: +r.month, y: +r.year, note: r.note || '' })).filter(r => r.note);
+}
+
+// Formatting helpers: render N/A clearly instead of misleading zeros
+function fmtNum(v) { return (v === null || v === undefined) ? '<span class="na-val">Belum ada data</span>' : v.toLocaleString('id-ID'); }
+function fmtPct(v) { return (v === null || v === undefined) ? '<span class="na-val">Belum ada data</span>' : v.toFixed(2).replace(/\.00$/,'').replace(/(\.\d)0$/,'$1') + '%'; }
+function fmtPlain(v) { return (v === null || v === undefined) ? '-' : v.toLocaleString('id-ID'); }
+function avgOrNull(arr) {
+  const vals = arr.filter(v => v !== null && v !== undefined);
+  return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null;
+}
+function sumOrNull(arr) {
+  const vals = arr.filter(v => v !== null && v !== undefined);
+  return vals.length ? vals.reduce((a,b)=>a+b,0) : null;
 }
 
 async function loadData() {
   try {
-    const res = await fetch(SHEET_CSV + '&t=' + Date.now());
+    const [res, notesRes] = await Promise.all([
+      fetch(SHEET_CSV + '&t=' + Date.now()),
+      fetch(NOTES_CSV + '&t=' + Date.now()).catch(() => null)
+    ]);
     if (!res.ok) throw new Error('Gagal mengambil data');
     const text = await res.text();
     allData = processData(parseCSV(text));
     if (!allData.length) throw new Error('Data kosong — pastikan sheet sudah diisi');
+
+    if (notesRes && notesRes.ok) {
+      try {
+        const notesText = await notesRes.text();
+        allNotes = processNotes(parseCSV(notesText));
+      } catch(e) { allNotes = []; }
+    }
+
     document.getElementById('last-updated').textContent = 'Update: ' + new Date().toLocaleString('id-ID');
     populateFilters();
     applyFilters();
@@ -302,10 +346,22 @@ function applyFilters() {
     (!year || d.y == year) &&
     (!month || d.m == month)
   );
+  renderNotesBanner();
   renderOverview();
   renderTrends();
   renderCompare();
   renderTable();
+}
+
+function renderNotesBanner() {
+  const wrap = document.getElementById('notes-banner-wrap');
+  const year = document.getElementById('f-year').value;
+  const month = document.getElementById('f-month').value;
+  const relevant = allNotes.filter(n => (!year || n.y==year) && (!month || n.m==month));
+  if (!relevant.length) { wrap.innerHTML = ''; return; }
+  wrap.innerHTML = `<div class="notes-banner">${relevant.map(n =>
+    `<div class="notes-banner-item"><b>📝 ${MONTHS_FULL[n.m]} ${n.y}:</b><span>${n.note}</span></div>`
+  ).join('')}</div>`;
 }
 
 function allSites() { return [...new Set(allData.map(d => d.site))].sort(); }
@@ -331,30 +387,28 @@ function renderSiteCards() {
   wrap.innerHTML = sites.map(site => {
     const rows = filtered.filter(d => d.site === site).sort((a,b) => b.y-a.y || b.m-a.m);
     if (!rows.length) return '';
-    // show the latest period for this site within the current filter
     const r = rows[0];
     const periodLabel = rows.length > 1
       ? `${MONTHS_FULL[rows[rows.length-1].m]} - ${MONTHS_FULL[r.m]} ${r.y}`
       : `${MONTHS_FULL[r.m]} ${r.y}`;
-    // if multiple periods are in view, sum/avg them; otherwise show the single period as-is
-    const daily = rows.length > 1 ? Math.round(rows.reduce((s,x)=>s+x.daily,0)/rows.length) : r.daily;
-    const total = rows.reduce((s,x)=>s+x.total,0);
-    const engage = rows.length > 1 ? (rows.reduce((s,x)=>s+x.engage,0)/rows.length) : r.engage;
-    const bounce = rows.length > 1 ? (rows.reduce((s,x)=>s+x.bounce,0)/rows.length) : r.bounce;
-    const events = rows.reduce((s,x)=>s+x.events,0);
-    const wa = rows.reduce((s,x)=>s+x.wa,0);
+    const daily = rows.length > 1 ? (avgOrNull(rows.map(x=>x.daily)) !== null ? Math.round(avgOrNull(rows.map(x=>x.daily))) : null) : r.daily;
+    const total = sumOrNull(rows.map(x=>x.total));
+    const engage = rows.length > 1 ? avgOrNull(rows.map(x=>x.engage)) : r.engage;
+    const bounce = rows.length > 1 ? avgOrNull(rows.map(x=>x.bounce)) : r.bounce;
+    const events = sumOrNull(rows.map(x=>x.events));
+    const wa = sumOrNull(rows.map(x=>x.wa));
     const countries = r.countries || '-';
 
     return `
       <div class="site-card">
         <h3>${site}</h3>
         <div class="site-period">${periodLabel}</div>
-        <div class="site-stat-row"><span class="site-stat-label">Pengunjung / Hari</span><span class="site-stat-val">${daily.toLocaleString('id-ID')}</span></div>
-        <div class="site-stat-row"><span class="site-stat-label">Total Kunjungan</span><span class="site-stat-val">${total.toLocaleString('id-ID')}</span></div>
-        <div class="site-stat-row"><span class="site-stat-label">Engagement Rate</span><span class="site-stat-val">${engage.toFixed(2)}%</span></div>
-        <div class="site-stat-row"><span class="site-stat-label">Event Count</span><span class="site-stat-val">${events.toLocaleString('id-ID')}</span></div>
-        <div class="site-stat-row"><span class="site-stat-label">WA</span><span class="site-stat-val">${wa || '-'}</span></div>
-        <div class="site-stat-row"><span class="site-stat-label">Bounce Rate</span><span class="site-stat-val">${bounce.toFixed(2)}%</span></div>
+        <div class="site-stat-row"><span class="site-stat-label">Pengunjung / Hari</span><span class="site-stat-val">${fmtNum(daily)}</span></div>
+        <div class="site-stat-row"><span class="site-stat-label">Total Kunjungan</span><span class="site-stat-val">${fmtNum(total)}</span></div>
+        <div class="site-stat-row"><span class="site-stat-label">Engagement Rate</span><span class="site-stat-val">${fmtPct(engage)}</span></div>
+        <div class="site-stat-row"><span class="site-stat-label">Event Count</span><span class="site-stat-val">${fmtNum(events)}</span></div>
+        <div class="site-stat-row"><span class="site-stat-label">Whatsapp Leads</span><span class="site-stat-val">${fmtNum(wa)}</span></div>
+        <div class="site-stat-row"><span class="site-stat-label">Bounce Rate</span><span class="site-stat-val">${fmtPct(bounce)}</span></div>
         <div class="site-stat-row"><span class="site-stat-label">Top Countries</span><span class="site-stat-val countries">${countries}</span></div>
       </div>
     `;
@@ -362,22 +416,22 @@ function renderSiteCards() {
 }
 
 function renderOverview() {
-  const totalVisits = filtered.reduce((s,d) => s+d.total, 0);
-  const totalWA = filtered.reduce((s,d) => s+d.wa, 0);
-  const avgEngage = filtered.length ? filtered.reduce((s,d) => s+d.engage, 0)/filtered.length : 0;
-  const avgBounce = filtered.length ? filtered.reduce((s,d) => s+d.bounce, 0)/filtered.length : 0;
+  const totalVisits = sumOrNull(filtered.map(d=>d.total)) || 0;
+  const totalWA = sumOrNull(filtered.map(d=>d.wa));
+  const avgEngage = avgOrNull(filtered.map(d=>d.engage));
+  const avgBounce = avgOrNull(filtered.map(d=>d.bounce));
 
   document.getElementById('ov-metrics').innerHTML = `
     <div class="metric-card"><div class="metric-label">Total Kunjungan</div><div class="metric-val">${totalVisits.toLocaleString('id-ID')}</div><div class="metric-sub">${filtered.length} baris data</div></div>
-    <div class="metric-card"><div class="metric-label">WA Leads</div><div class="metric-val">${totalWA.toLocaleString('id-ID')}</div></div>
-    <div class="metric-card"><div class="metric-label">Avg Engagement Rate</div><div class="metric-val">${avgEngage.toFixed(1)}%</div></div>
-    <div class="metric-card"><div class="metric-label">Avg Bounce Rate</div><div class="metric-val">${avgBounce.toFixed(1)}%</div></div>
+    <div class="metric-card"><div class="metric-label">Whatsapp Leads</div><div class="metric-val">${fmtNum(totalWA)}</div></div>
+    <div class="metric-card"><div class="metric-label">Avg Engagement Rate</div><div class="metric-val">${fmtPct(avgEngage)}</div></div>
+    <div class="metric-card"><div class="metric-label">Avg Bounce Rate</div><div class="metric-val">${fmtPct(avgBounce)}</div></div>
   `;
 
   renderSiteCards();
 
   const sites = allSites();
-  const siteTotals = sites.map(s => filtered.filter(d => d.site===s).reduce((a,d) => a+d.total, 0));
+  const siteTotals = sites.map(s => sumOrNull(filtered.filter(d => d.site===s).map(d=>d.total)) || 0);
   makeLegend('leg-visits', sites);
   destroyChart('visits');
   charts['visits'] = new Chart(document.getElementById('ch-visits'), {
@@ -386,16 +440,16 @@ function renderOverview() {
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => v>=1000 ? Math.round(v/1000)+'k' : v, color: '#898781' }, grid: { color: 'rgba(0,0,0,0.05)' } }, x: { ticks: { color: '#898781', font: { size: 11 } }, grid: { display: false } } } }
   });
 
-  const siteEngage = sites.map(s => { const sd=filtered.filter(d=>d.site===s); return sd.length ? sd.reduce((a,d)=>a+d.engage,0)/sd.length : 0; });
-  const siteBounce = sites.map(s => { const sd=filtered.filter(d=>d.site===s); return sd.length ? sd.reduce((a,d)=>a+d.bounce,0)/sd.length : 0; });
+  const siteEngage = sites.map(s => { const v = avgOrNull(filtered.filter(d=>d.site===s).map(d=>d.engage)); return v === null ? 0 : +v.toFixed(1); });
+  const siteBounce = sites.map(s => { const v = avgOrNull(filtered.filter(d=>d.site===s).map(d=>d.bounce)); return v === null ? 0 : +v.toFixed(1); });
   destroyChart('engbounce');
   charts['engbounce'] = new Chart(document.getElementById('ch-engbounce'), {
     type: 'bar',
-    data: { labels: sites.map(s => s.replace('.com','').replace('.co.id','')), datasets: [{ label: 'Engagement', data: siteEngage.map(v => +v.toFixed(1)), backgroundColor: '#2a78d6', borderRadius: 4 }, { label: 'Bounce', data: siteBounce.map(v => +v.toFixed(1)), backgroundColor: '#e34948', borderRadius: 4 }] },
+    data: { labels: sites.map(s => s.replace('.com','').replace('.co.id','')), datasets: [{ label: 'Engagement', data: siteEngage, backgroundColor: '#2a78d6', borderRadius: 4 }, { label: 'Bounce', data: siteBounce, backgroundColor: '#e34948', borderRadius: 4 }] },
     options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } }, scales: { y: { ticks: { callback: v => v+'%', color: '#898781' }, grid: { color: 'rgba(0,0,0,0.05)' }, min: 0, max: 100 }, x: { ticks: { color: '#898781', font: { size: 11 } }, grid: { display: false } } } }
   });
 
-  const siteWA = sites.map(s => filtered.filter(d=>d.site===s).reduce((a,d)=>a+d.wa,0));
+  const siteWA = sites.map(s => sumOrNull(filtered.filter(d=>d.site===s).map(d=>d.wa)) || 0);
   makeLegend('leg-wa', sites);
   destroyChart('wa-bar');
   charts['wa-bar'] = new Chart(document.getElementById('ch-wa-bar'), {
@@ -407,7 +461,7 @@ function renderOverview() {
 
 function renderTrends() {
   const metric = document.getElementById('f-metric').value;
-  const labels = { total: 'Total Kunjungan', daily: 'Pengunjung / Hari', engage: 'Engagement Rate (%)', bounce: 'Bounce Rate (%)', events: 'Event Count', wa: 'WA Leads' };
+  const labels = { total: 'Total Kunjungan', daily: 'Pengunjung / Hari', engage: 'Engagement Rate (%)', bounce: 'Bounce Rate (%)', events: 'Event Count', wa: 'Whatsapp Leads' };
   document.getElementById('trend-title').textContent = 'Tren ' + labels[metric];
 
   const site = document.getElementById('f-site').value;
@@ -435,9 +489,9 @@ function renderTrends() {
 
 function renderCompare() {
   const sites = allSites();
-  const siteEngage = sites.map(s => { const sd=filtered.filter(d=>d.site===s); return sd.length ? +(sd.reduce((a,d)=>a+d.engage,0)/sd.length).toFixed(1) : 0; });
-  const siteBounce = sites.map(s => { const sd=filtered.filter(d=>d.site===s); return sd.length ? +(sd.reduce((a,d)=>a+d.bounce,0)/sd.length).toFixed(1) : 0; });
-  const siteEvents = sites.map(s => filtered.filter(d=>d.site===s).reduce((a,d)=>a+d.events,0));
+  const siteEngage = sites.map(s => { const v = avgOrNull(filtered.filter(d=>d.site===s).map(d=>d.engage)); return v === null ? 0 : +v.toFixed(1); });
+  const siteBounce = sites.map(s => { const v = avgOrNull(filtered.filter(d=>d.site===s).map(d=>d.bounce)); return v === null ? 0 : +v.toFixed(1); });
+  const siteEvents = sites.map(s => sumOrNull(filtered.filter(d=>d.site===s).map(d=>d.events)) || 0);
   const labels = sites.map(s => s.replace('.com','').replace('.co.id',''));
 
   destroyChart('cmp-engage');
@@ -468,17 +522,17 @@ function renderTable() {
   if (!sorted.length) { document.getElementById('tbl-wrap').innerHTML = '<div style="padding:2rem;text-align:center;color:#898781;font-size:14px">Tidak ada data untuk filter ini.</div>'; return; }
   document.getElementById('tbl-wrap').innerHTML = `
     <table>
-      <thead><tr><th>Website</th><th>Bulan</th><th>Thn</th><th>Pgj/Hari</th><th>Total</th><th>Engage</th><th>Bounce</th><th>Events</th><th>WA</th><th>Top Countries</th></tr></thead>
+      <thead><tr><th>Website</th><th>Bulan</th><th>Thn</th><th>Pgj/Hari</th><th>Total</th><th>Engage</th><th>Bounce</th><th>Events</th><th>Whatsapp Leads</th><th>Top Countries</th></tr></thead>
       <tbody>${sorted.map(r => `<tr>
         <td>${r.site}</td>
         <td>${MONTHS_FULL[r.m]}</td>
         <td>${r.y}</td>
-        <td>${r.daily.toLocaleString('id-ID')}</td>
-        <td>${r.total.toLocaleString('id-ID')}</td>
-        <td><span class="badge ${r.engage>=40?'badge-green':'badge-blue'}">${r.engage.toFixed(1)}%</span></td>
-        <td><span class="badge ${r.bounce>=75?'badge-red':r.bounce>=55?'badge-blue':'badge-green'}">${r.bounce.toFixed(1)}%</span></td>
-        <td>${r.events.toLocaleString('id-ID')}</td>
-        <td>${r.wa || '-'}</td>
+        <td>${fmtPlain(r.daily)}</td>
+        <td>${fmtPlain(r.total)}</td>
+        <td>${r.engage===null ? '<span class="na-val">Belum ada data</span>' : `<span class="badge ${r.engage>=40?'badge-green':'badge-blue'}">${r.engage.toFixed(2).replace(/0$/,'')}%</span>`}</td>
+        <td>${r.bounce===null ? '<span class="na-val">Belum ada data</span>' : `<span class="badge ${r.bounce>=75?'badge-red':r.bounce>=55?'badge-blue':'badge-green'}">${r.bounce.toFixed(2).replace(/0$/,'')}%</span>`}</td>
+        <td>${fmtPlain(r.events)}</td>
+        <td>${fmtPlain(r.wa)}</td>
         <td class="top-countries">${r.countries || '-'}</td>
       </tr>`).join('')}</tbody>
     </table>
