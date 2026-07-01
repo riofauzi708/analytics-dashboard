@@ -55,7 +55,19 @@
 
   .navbar { background: var(--surface); border-bottom: 1px solid var(--border); position: -webkit-sticky; position: sticky; top: 0; z-index: 200; transition: background 0.3s ease, border-color 0.3s ease; padding-top: env(safe-area-inset-top, 0px); }
   .navbar-row { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; padding-left: max(1.5rem, env(safe-area-inset-left)); padding-right: max(1.5rem, env(safe-area-inset-right)); height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
-  .navbar-brand { font-size: 16px; font-weight: 600; letter-spacing: -0.3px; display: flex; align-items: center; gap: 8px; white-space: nowrap; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+  .navbar-brand { font-size: 16px; font-weight: 600; letter-spacing: -0.3px; display: flex; align-items: center; gap: 8px; white-space: nowrap; min-width: 0; }
+  .brand-text-viewport { overflow: hidden; min-width: 0; flex: 1 1 auto; }
+  .brand-text { display: inline-block; white-space: nowrap; will-change: transform; }
+  /* Only gets this class from JS, and only when the text is actually
+     wider than its viewport on a narrow screen — see updateBrandMarquee().
+     Pure transform animation, so it costs nothing when not applied and
+     is cheap (GPU-composited) when it is. */
+  .brand-text.marquee { animation: brandMarquee 7s ease-in-out infinite; }
+  @keyframes brandMarquee {
+    0%, 12% { transform: translateX(0); }
+    50%, 62% { transform: translateX(calc(-1 * var(--marquee-distance, 0px))); }
+    96%, 100% { transform: translateX(0); }
+  }
 
   /* Area Navigasi Utama Desktop */
   .navbar-left-group { display: flex; align-items: center; gap: 24px; min-width: 0; flex: 1 1 auto; }
@@ -79,6 +91,8 @@
 
   .theme-toggle { background: var(--surface2); border: 1px solid var(--border); width: 38px; height: 38px; border-radius: 10px; cursor: pointer; font-size: 15px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
   .theme-toggle:hover { border-color: var(--text3); background: var(--surface); transform: translateY(-1px); }
+  .theme-toggle.spin, .theme-toggle-menu.spin { animation: iconSpin .4s cubic-bezier(0.22,0.68,0,1.1); }
+  @keyframes iconSpin { from { transform: rotate(0deg) scale(1); } 50% { transform: rotate(150deg) scale(0.85); } to { transform: rotate(180deg) scale(1); } }
 
   .nav-toggle { display: none; flex-direction: column; justify-content: center; gap: 4px; width: 38px; height: 38px; border: 1px solid var(--border); border-radius: 10px; background: var(--surface2); cursor: pointer; }
   .nav-toggle-bar { width: 18px; height: 2px; background: var(--text2); margin: 0 auto; border-radius: 2px; transition: all 0.2s ease; }
@@ -101,6 +115,7 @@
 
   .btn { height: 40px; padding: 0 20px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); white-space: nowrap; }
   .btn:hover { background: var(--surface); color: var(--text); border-color: var(--text3); transform: translateY(-1px); }
+  .btn:active { transform: translateY(0) scale(0.96); transition-duration: .08s; }
   .btn-accent { background: var(--accent); color: #fff; border: none; }
   .btn-accent:hover { background: var(--accent); opacity: 0.95; color: #fff; box-shadow: 0 4px 12px var(--accent-light); }
   .btn-danger-outline { color: var(--danger); border-color: rgba(227, 73, 72, 0.15); background: transparent; }
@@ -110,8 +125,8 @@
   .grid4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 1.5rem; }
   .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 20px; margin-bottom: 1.5rem; }
 
-  .metric-card { background: var(--surface); border-radius: var(--radius); padding: 1.5rem; border: 1px solid var(--border); box-shadow: var(--shadow); transition: transform 0.2s ease, box-shadow 0.2s ease; }
-  .metric-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
+  .metric-card { background: var(--surface); border-radius: var(--radius); padding: 1.5rem; border: 1px solid var(--border); box-shadow: var(--shadow); transition: transform 0.22s cubic-bezier(0.22,0.68,0,1.1), box-shadow 0.22s ease; }
+  .metric-card:hover { transform: translateY(-3px) scale(1.015); box-shadow: var(--shadow-hover); }
   .metric-label { font-size: 12px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 8px; }
   .metric-val { font-size: 28px; font-weight: 700; color: var(--text); line-height: 1.1; letter-spacing: -0.5px; font-variant-numeric: tabular-nums; }
   .metric-delta { font-size: 12px; margin-top: 6px; display: flex; align-items: center; gap: 4px; font-weight: 500; }
@@ -135,10 +150,11 @@
   .tab { height: 40px; display: inline-flex; align-items: center; padding: 0 16px; font-size: 13.5px; font-weight: 500; cursor: pointer; border: none; background: none; color: var(--text3); border-radius: 8px; transition: all 0.2s ease; white-space: nowrap; }
   .tab.active { color: var(--accent); background: var(--accent-light); font-weight: 600; }
   .tab:hover:not(.active) { color: var(--text); background: var(--surface2); }
+  .tab:active { transform: scale(0.95); }
 
-  .section { display: none; animation: fadeIn 0.3s ease-out; }
+  .section { display: none; animation: fadeIn 0.32s cubic-bezier(0.22, 0.68, 0, 1.05); }
   .section.active { display: block; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px) scale(0.99); } to { opacity: 1; transform: translateY(0) scale(1); } }
 
   .badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; white-space: nowrap; }
   .badge-green { background: rgba(27, 175, 122, 0.12); color: var(--success); }
@@ -178,8 +194,8 @@
   tr.row-entering { animation: rowFadeIn .3s ease both; }
 
   .site-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-bottom: 1.5rem; }
-  .site-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; display: flex; flex-direction: column; box-shadow: var(--shadow); transition: background 0.3s ease, box-shadow 0.3s ease; }
-  .site-card:hover { box-shadow: var(--shadow-hover); }
+  .site-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; display: flex; flex-direction: column; box-shadow: var(--shadow); transition: background 0.3s ease, box-shadow 0.22s ease, transform 0.22s cubic-bezier(0.22,0.68,0,1.1); }
+  .site-card:hover { box-shadow: var(--shadow-hover); transform: translateY(-3px) scale(1.012); }
   .site-card h3 { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 2px; letter-spacing: -0.2px; }
   .site-card .site-period { font-size: 12px; color: var(--text3); margin-bottom: 1.25rem; }
   .site-stat-row { display: flex; align-items: baseline; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); gap: 10px; }
@@ -286,7 +302,8 @@
       box-shadow: 0 8px 16px rgba(0,0,0,0.06);
       z-index: 199;
     }
-    .navbar-menu.open { display: flex; }
+    .navbar-menu.open { display: flex; animation: menuSlideDown .22s cubic-bezier(0.22,0.68,0,1.1) both; }
+    @keyframes menuSlideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
     .tab { width: 100%; justify-content: flex-start; height: 42px; padding: 0 12px; }
 
     .menu-divider { display: block; height: 1px; background: var(--border); margin: 6px 2px; }
@@ -364,7 +381,7 @@
     <div class="navbar-left-group">
       <div class="navbar-brand" style="display: flex; align-items: center; gap: 8px;">
        <img src="dashboard-analytics.png" alt="Logo" style="height: 24px; width: auto; object-fit: contain; flex-shrink: 0;">
-       <span class="brand-text">Enterprise Web Analytics</span>
+       <span class="brand-text-viewport" id="brand-text-viewport"><span class="brand-text" id="brand-text">Enterprise Web Analytics</span></span>
       </div>
 
       <div class="navbar-menu" id="navbar-menu">
@@ -533,6 +550,14 @@ const MONTHS = ['','Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','
 const MONTHS_FULL = ['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 const COLORS = ['#2a78d6','#1baf7a','#eda100','#8b5cf6','#e34948','#ec4899','#f97316','#10b981','#6b7280'];
 
+// A snappier, more noticeable draw-in than Chart.js's default easing —
+// applies globally so every chart (and every re-render on filter change)
+// gets it without editing each individual chart config below.
+if (typeof Chart !== 'undefined') {
+  Chart.defaults.animation = { duration: 650, easing: 'easeOutQuart' };
+  Chart.defaults.animations.resize = { duration: 0 };
+}
+
 // ---- Reliability settings ----
 const CACHE_KEY = 'ewa_dashboard_cache_v1';
 const FETCH_TIMEOUT_MS = 12000;   // stop waiting on a stalled request instead of hanging forever
@@ -584,6 +609,13 @@ function toggleTheme() {
   applyThemeUI(target);
   if (allData.length) applyFilters();
 
+  [document.getElementById('theme-btn'), document.getElementById('theme-btn-menu')].forEach(btn => {
+    if (!btn) return;
+    btn.classList.remove('spin');
+    void btn.offsetWidth; // restart the animation even on rapid toggles
+    btn.classList.add('spin');
+  });
+
   const menu = document.getElementById('navbar-menu');
   if (menu.classList.contains('open')) {
     menu.classList.remove('open');
@@ -597,6 +629,29 @@ function toggleNavMenu() {
   const isOpen = menu.classList.toggle('open');
   btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
 }
+
+// The brand text truncates on narrow screens. Rather than just clipping it,
+// scroll it back and forth — but only when it's actually wider than the
+// space it has, and only below the width where the collapsed navbar gives
+// it very little room. Cheap: one measurement, a CSS class, done.
+function updateBrandMarquee() {
+  const viewport = document.getElementById('brand-text-viewport');
+  const text = document.getElementById('brand-text');
+  if (!viewport || !text) return;
+  text.classList.remove('marquee');
+  text.style.removeProperty('--marquee-distance');
+  if (window.innerWidth > 640) return;
+  const overflow = text.scrollWidth - viewport.clientWidth;
+  if (overflow > 4) {
+    text.style.setProperty('--marquee-distance', overflow + 'px');
+    text.classList.add('marquee');
+  }
+}
+let brandResizeTimer = null;
+window.addEventListener('resize', () => {
+  clearTimeout(brandResizeTimer);
+  brandResizeTimer = setTimeout(updateBrandMarquee, 200);
+});
 
 const indonesianTooltipConfig = {
   callbacks: {
@@ -812,12 +867,32 @@ function revealMainContent() {
   mainEl.style.display = 'block';
   mainEl.classList.add('reveal');
   setTimeout(() => { loadingEl.style.display = 'none'; }, prefersReducedMotion ? 0 : 320);
+  updateBrandMarquee();
 }
 
 async function loadData() {
   initTheme();
+
+  // Stale-while-revalidate: if we already have a successful pull saved
+  // locally, paint it immediately (no skeleton wait at all) and refresh
+  // quietly in the background. This is what actually makes repeat visits
+  // feel instant — the previous version only touched the cache after a
+  // failed fetch, so every visit paid the full network round-trip.
+  const cached = loadCache();
+  const cacheFirst = !!(cached && cached.data && cached.data.length);
+
+  if (cacheFirst) {
+    allData = cached.data;
+    allNotes = cached.notes || [];
+    const cachedTime = new Date(cached.ts).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    setStatus('stale', cachedTime);
+    populateFilters();
+    applyFilters();
+    revealMainContent();
+  } else {
+    setStatus('loading');
+  }
   setProgress('active');
-  setStatus('loading');
 
   try {
     const [res, notesRes] = await Promise.all([
@@ -841,31 +916,23 @@ async function loadData() {
 
     populateFilters();
     applyFilters();
-    revealMainContent();
+    if (!cacheFirst) revealMainContent();
+    else showToast('Data diperbarui (' + timeStr + ' WIB).');
   } catch (e) {
-    const cached = loadCache();
-    if (cached && cached.data && cached.data.length) {
-      // Network failed, but we have something to show — degrade gracefully
-      // instead of showing a blank error screen.
-      allData = cached.data;
-      allNotes = cached.notes || [];
-      const cachedTime = new Date(cached.ts).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
-      setStatus('stale', cachedTime);
-      setProgress('done');
-
-      populateFilters();
-      applyFilters();
-      revealMainContent();
-      showToast('Koneksi bermasalah — menampilkan data tersimpan terakhir (' + cachedTime + ' WIB).');
-    } else {
+    if (cacheFirst) {
+      // Already showing cached data — just note that the background
+      // refresh failed and keep the 'stale' status as-is, no error screen.
       setProgress('idle');
-      setStatus('error');
-      document.getElementById('loading').style.display = 'none';
-      document.getElementById('error').style.display = 'block';
-      document.getElementById('error').innerHTML =
-        'Gagal memuat data: ' + (e.message || 'periksa koneksi internet Anda') +
-        '<br><button class="btn btn-accent" onclick="location.reload()">Coba Lagi</button>';
+      showToast('Gagal memperbarui data — masih menampilkan data tersimpan.');
+      return;
     }
+    setProgress('idle');
+    setStatus('error');
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('error').style.display = 'block';
+    document.getElementById('error').innerHTML =
+      'Gagal memuat data: ' + (e.message || 'periksa koneksi internet Anda') +
+      '<br><button class="btn btn-accent" onclick="location.reload()">Coba Lagi</button>';
   }
 }
 
