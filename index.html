@@ -226,6 +226,33 @@
     .grid2 { grid-template-columns: 1fr; }
   }
 
+ /* Navbar switches to hamburger earlier than the filter-bar breakpoint,
+   because brand + 4 tabs + status text don't fit between 768–1024px */
+@media (max-width: 1024px) {
+  .nav-toggle { display: flex; }
+  .navbar-right { margin-left: initial; }
+
+  .navbar-menu {
+    display: none;
+    position: absolute;
+    top: 64px;
+    left: 0; right: 0;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 4px;
+    padding: 10px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    box-shadow: 0 8px 16px rgba(0,0,0,0.06);
+    z-index: 199;
+  }
+  .navbar-menu.open { display: flex; }
+  .tab { width: 100%; justify-content: flex-start; height: 42px; padding: 0 12px; }
+
+  .status-text-full { display: none; }
+  .status-text-short { display: inline; }
+}
+
   /* Perubahan Responsif Mobile Core */
   @media (max-width: 768px) {
     .navbar-row { height: 56px; padding: 0 1rem; position: relative; }
