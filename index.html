@@ -55,14 +55,14 @@
 
   .navbar { background: var(--surface); border-bottom: 1px solid var(--border); position: -webkit-sticky; position: sticky; top: 0; z-index: 200; transition: background 0.3s ease, border-color 0.3s ease; padding-top: env(safe-area-inset-top, 0px); }
   .navbar-row { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; padding-left: max(1.5rem, env(safe-area-inset-left)); padding-right: max(1.5rem, env(safe-area-inset-right)); height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
-  .navbar-brand { font-size: 16px; font-weight: 600; letter-spacing: -0.3px; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
+  .navbar-brand { font-size: 16px; font-weight: 600; letter-spacing: -0.3px; display: flex; align-items: center; gap: 8px; white-space: nowrap; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 
   /* Area Navigasi Utama Desktop */
-  .navbar-left-group { display: flex; align-items: center; gap: 24px; }
+  .navbar-left-group { display: flex; align-items: center; gap: 24px; min-width: 0; flex: 1 1 auto; }
   .navbar-menu { display: flex; align-items: center; gap: 4px; }
 
   /* Posisi Ujung Kanan Navbar */
-  .navbar-right { display: flex; align-items: center; gap: 12px; margin-left: auto; }
+  .navbar-right { display: flex; align-items: center; gap: 12px; margin-left: auto; flex-shrink: 0; }
 
   /* ===== Status indicator: replaces the old last-updated-text.
      Unlike before, this stays visible at every breakpoint — only the
@@ -226,50 +226,22 @@
     .grid2 { grid-template-columns: 1fr; }
   }
 
- /* Navbar switches to hamburger earlier than the filter-bar breakpoint,
-   because brand + 4 tabs + status text don't fit between 768–1024px */
-@media (max-width: 1024px) {
-  .nav-toggle { display: flex; }
-  .navbar-right { margin-left: initial; }
-
-  .navbar-menu {
-    display: none;
-    position: absolute;
-    top: 64px;
-    left: 0; right: 0;
-    flex-direction: column;
-    align-items: stretch;
-    gap: 4px;
-    padding: 10px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-    box-shadow: 0 8px 16px rgba(0,0,0,0.06);
-    z-index: 199;
-  }
-  .navbar-menu.open { display: flex; }
-  .tab { width: 100%; justify-content: flex-start; height: 42px; padding: 0 12px; }
-
-  .status-text-full { display: none; }
-  .status-text-short { display: inline; }
-}
-
-  /* Perubahan Responsif Mobile Core */
-  @media (max-width: 768px) {
-    .navbar-row { height: 56px; padding: 0 1rem; position: relative; }
+  /* ===== Navbar collapse (tablet + small laptop range) =====
+     The brand + 4 tabs + full status text don't fit between roughly
+     768px and 1024px, so the hamburger kicks in here — independently
+     of the filter-bar breakpoint below, which stays at 768px. */
+  @media (max-width: 1024px) {
+    .navbar-row { position: relative; }
     .nav-toggle { display: flex; order: 3; }
-    .navbar-right { margin-left: initial; gap: 8px; order: 2; }
+    .navbar-right { margin-left: initial; order: 2; }
 
-    /* Status indicator stays visible — it just switches to a compact
-       label instead of disappearing, so "Memuat data..." (and later
-       the updated/stale/error state) is always legible on mobile too. */
-    .status-indicator { padding: 5px 8px; gap: 5px; font-size: 11px; }
     .status-text-full { display: none; }
     .status-text-short { display: inline; }
 
     .navbar-menu {
       display: none;
       position: absolute;
-      top: calc(56px + env(safe-area-inset-top, 0px)); left: 0; right: 0;
+      top: calc(64px + env(safe-area-inset-top, 0px)); left: 0; right: 0;
       flex-direction: column;
       align-items: stretch;
       gap: 4px;
@@ -281,6 +253,12 @@
     }
     .navbar-menu.open { display: flex; }
     .tab { width: 100%; justify-content: flex-start; height: 42px; padding: 0 12px; }
+  }
+
+  /* Perubahan Responsif Mobile Core */
+  @media (max-width: 768px) {
+    .navbar-row { height: 56px; padding: 0 1rem; }
+    .navbar-menu { top: calc(56px + env(safe-area-inset-top, 0px)); }
 
     .filter-wrapper { top: calc(56px + env(safe-area-inset-top, 0px)); padding: 0.5rem 0; }
     .filter-bar {
@@ -324,6 +302,10 @@
     .info-box ul { grid-template-columns: 1fr; gap: 10px; }
   }
 
+  @media (max-width: 400px) {
+    .navbar-brand span.brand-text { display: none; }
+  }
+
   @media (max-width: 480px) {
     .filter-bar { grid-template-columns: repeat(2, 1fr); }
     .filter-bar > div:nth-child(1) { grid-column: span 2; }
@@ -354,8 +336,8 @@
   <div class="navbar-row">
     <div class="navbar-left-group">
       <div class="navbar-brand" style="display: flex; align-items: center; gap: 8px;">
-       <img src="dashboard-analytics.png" alt="Logo" style="height: 24px; width: auto; object-fit: contain;">
-       Enterprise Web Analytics
+       <img src="dashboard-analytics.png" alt="Logo" style="height: 24px; width: auto; object-fit: contain; flex-shrink: 0;">
+       <span class="brand-text">Enterprise Web Analytics</span>
       </div>
 
       <div class="navbar-menu" id="navbar-menu">
