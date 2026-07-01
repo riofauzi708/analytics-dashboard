@@ -90,9 +90,9 @@
   .container { max-width: 1280px; margin: 0 auto; padding: 1.5rem; }
 
   .filter-wrapper { position: -webkit-sticky; position: sticky; top: calc(64px + env(safe-area-inset-top, 0px)); z-index: 100; background: linear-gradient(to bottom, var(--bg) 85%, rgba(0,0,0,0)); padding: 1rem 0 1.5rem 0; }
-  .filter-bar { display: flex; flex-wrap: wrap; gap: clamp(8px, 1.6vw, 16px); align-items: flex-end; background: var(--surface); padding: clamp(0.75rem, 2vw, 1.25rem); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); transition: background 0.3s ease, border-color 0.3s ease; }
+  .filter-bar { display: flex; flex-wrap: wrap; gap: clamp(8px, 1.6vw, 16px); align-items: flex-end; background: var(--surface); padding: clamp(0.75rem, 2vw, 1.25rem); border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); transition: background 0.3s ease, border-color 0.3s ease; min-height: 82px; }
   .filter-bar > div { display: flex; flex-direction: column; gap: 6px; flex: 1 1 130px; min-width: 110px; }
-  .filter-bar label { font-size: clamp(10px, 0.9vw, 11px); color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; }
+  .filter-bar label { font-size: clamp(10px, 0.9vw, 11px); color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap; height: 13px; }
 
   select, .search-input { width: 100%; padding: 0 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface2); color: var(--text); font-size: clamp(12px, 1.1vw, 13px); cursor: pointer; height: clamp(36px, 4vw, 40px); transition: all 0.2s ease; -webkit-appearance: none; appearance: none; }
   select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23868e96'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 14px; padding-right: 35px; }
@@ -106,20 +106,24 @@
   .btn-accent:hover { background: var(--accent); opacity: 0.95; color: #fff; box-shadow: 0 4px 12px var(--accent-light); }
   .btn-danger-outline { color: var(--danger); border-color: rgba(227, 73, 72, 0.15); background: transparent; }
   .btn-danger-outline:hover { background: rgba(227, 73, 72, 0.06); border-color: var(--danger); color: var(--danger); }
-  .filter-bar .btn-danger-outline { flex: 0 1 140px; min-width: 120px; }
+  .filter-bar .btn-danger-outline { flex: 0 1 140px; min-width: 120px; height: 40px; }
 
-  .grid4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 1.5rem; }
+  /* Tinggi dan grid kartu metrik dikunci paten untuk anti Layout Shift */
+  .grid4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 1.5rem; min-height: 127px; }
   .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 20px; margin-bottom: 1.5rem; }
 
-  .metric-card { background: var(--surface); border-radius: var(--radius); padding: 1.5rem; border: 1px solid var(--border); box-shadow: var(--shadow); transition: transform 0.22s cubic-bezier(0.22,0.68,0,1.1), box-shadow 0.22s ease; }
+  .metric-card { background: var(--surface); border-radius: var(--radius); padding: 1.5rem; border: 1px solid var(--border); box-shadow: var(--shadow); transition: transform 0.22s cubic-bezier(0.22,0.68,0,1.1), box-shadow 0.22s ease; height: 127px; display: flex; flex-direction: column; justify-content: space-between; }
   .metric-card:hover { transform: translateY(-3px) scale(1.015); box-shadow: var(--shadow-hover); }
-  .metric-label { font-size: 12px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 8px; }
-  .metric-val { font-size: 28px; font-weight: 700; color: var(--text); line-height: 1.1; letter-spacing: -0.5px; font-variant-numeric: tabular-nums; }
-  .metric-delta { font-size: 12px; margin-top: 6px; display: flex; align-items: center; gap: 4px; font-weight: 500; }
+  .metric-label { font-size: 12px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; height: 14px; line-height: 14px; }
+  .metric-val { font-size: 28px; font-weight: 700; color: var(--text); line-height: 31px; height: 31px; letter-spacing: -0.5px; font-variant-numeric: tabular-nums; margin: 6px 0; }
+  
+  /* Desain Paten Delta & Sub - Kunci Ruang agar bebas CLS */
+  .metric-delta-wrap { height: 16px; min-height: 16px; display: flex; align-items: center; }
+  .metric-delta { font-size: 12px; display: inline-flex; align-items: center; gap: 4px; font-weight: 500; height: 16px; line-height: 16px; }
   .metric-delta.up { color: var(--success); }
   .metric-delta.down { color: var(--danger); }
   .metric-delta.neutral { color: var(--text3); }
-  .metric-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
+  .metric-sub { font-size: 11px; color: var(--text3); height: 16px; line-height: 16px; }
 
   .card { background: var(--surface); border-radius: var(--radius); padding: 1.5rem; border: 1px solid var(--border); box-shadow: var(--shadow); position: relative; overflow: hidden; transition: background 0.3s ease, border-color 0.3s ease; }
   .card-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; gap: 10px; }
@@ -129,7 +133,6 @@
   .card h2 { font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -0.1px; }
   .chart-wrap { position: relative; width: 100%; }
 
-  /* Class tambahan untuk menangani state grafik kosong */
   .chart-empty-state { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text3); font-size: 13px; font-style: italic; background: rgba(var(--surface), 0.4); pointer-events: none; }
 
   .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
@@ -141,9 +144,8 @@
   .tab:hover:not(.active) { color: var(--text); background: var(--surface2); }
   .tab:active { transform: scale(0.95); }
 
-  .section { display: none; animation: fadeIn 0.32s cubic-bezier(0.22, 0.68, 0, 1.05); }
+  .section { display: none; }
   .section.active { display: block; }
-  @keyframes fadeIn { from { opacity: 0; transform: translateY(10px) scale(0.99); } to { opacity: 1; transform: translateY(0); } }
 
   .badge { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 11px; font-weight: 600; white-space: nowrap; }
   .badge-green { background: rgba(27, 175, 122, 0.12); color: var(--success); }
@@ -216,13 +218,14 @@
   .stale-banner { display: flex; align-items: center; gap: 10px; background: rgba(237, 161, 0, 0.08); border: 1px solid rgba(237, 161, 0, 0.18); border-radius: var(--radius); padding: 0.85rem 1.1rem; margin-bottom: 1.5rem; font-size: 13px; color: var(--text2); animation: revealDown .35s ease both; }
   .stale-banner b { color: var(--warning); }
 
-  .skeleton-wrap { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; transition: opacity .35s ease; }
-  .skeleton-wrap.fade-out { opacity: 0; }
-  .skeleton-card { height: 120px; background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 1.5rem; }
-  .skeleton-element { background: linear-gradient(90deg, var(--shimmer) 25%, var(--shimmer-glow) 37%, var(--shimmer) 63%); background-size: 400% 100%; animation: shimmer 1.4s ease infinite; border-radius: 4px; }
-  .skeleton-title { height: 14px; width: 45%; margin-bottom: 14px; }
-  .skeleton-value { height: 28px; width: 70%; }
+  /* SKELETON LOADER - Desain presisi ber-shimmer untuk anti Layout Shift */
+  .skeleton { background: linear-gradient(90deg, var(--shimmer) 25%, var(--shimmer-glow) 37%, var(--shimmer) 63%); background-size: 400% 100%; animation: shimmer 1.4s ease infinite; border-radius: 4px; display: block; }
   @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
+  
+  .sk-label { height: 14px; width: 65%; }
+  .sk-val { height: 31px; width: 45%; margin: 6px 0; }
+  .sk-delta { height: 16px; width: 80%; }
+
   .error-msg { text-align: center; padding: 4rem 1.5rem; color: var(--danger); font-size: 15px; font-weight: 500; }
   .error-msg .btn { margin-top: 1.25rem; }
   .section-full { margin-bottom: 1.5rem; }
@@ -281,10 +284,10 @@
     .navbar-row { height: 56px; padding: 0 1rem; }
     .navbar-menu { top: calc(56px + env(safe-area-inset-top, 0px)); }
     .filter-wrapper { top: calc(56px + env(safe-area-inset-top, 0px)); padding: 0.5rem 0; }
-    .grid4 { grid-template-columns: repeat(2, 1fr); gap: 12px; }
+    .grid4 { grid-template-columns: repeat(2, 1fr); gap: 12px; height: auto; }
+    .metric-card { height: 120px; padding: 1rem; }
+    .metric-val { font-size: 22px; height: 25px; line-height: 25px; }
     .site-cards { grid-template-columns: 1fr; }
-    .metric-card { padding: 1rem; }
-    .metric-val { font-size: 22px; }
     .card { padding: 1rem; }
     .chart-wrap { height: 210px !important; }
     .info-box ul { grid-template-columns: 1fr; gap: 10px; }
@@ -301,12 +304,12 @@
   }
 
   @media (max-width: 640px) {
-    .filter-bar { padding: 0.55rem; gap: 6px; border-radius: 9px; }
+    .filter-bar { padding: 0.55rem; gap: 6px; border-radius: 9px; min-height: auto; }
     .filter-bar > div:nth-child(1) { flex-basis: 100%; }
     .filter-bar > div:nth-child(2), .filter-bar > div:nth-child(3) { flex: 1 1 calc(50% - 4px); min-width: 0; }
     .filter-bar > div { gap: 4px; }
     .filter-bar .btn-danger-outline { flex-basis: 100%; height: 33px; font-size: 12px; }
-    .filter-bar label { font-size: 10px; }
+    .filter-bar label { font-size: 10px; height: auto; }
     .filter-bar select { height: 33px; font-size: 12px; padding: 0 8px; padding-right: 24px; background-position: right 8px center; background-size: 11px; }
   }
 
@@ -327,7 +330,7 @@
 <nav class="navbar">
   <div class="navbar-row">
     <div class="navbar-left-group">
-      <div class="navbar-brand" style="display: flex; align-items: center; gap: 8px;">
+      <div class="navbar-brand">
        <img src="dashboard-analytics.png" alt="Logo" style="height: 24px; width: auto; object-fit: contain; flex-shrink: 0;">
        <span class="brand-text-viewport" id="brand-text-viewport"><span class="brand-text" id="brand-text">Enterprise Web Analytics</span></span>
       </div>
@@ -361,14 +364,7 @@
 </nav>
 
 <div class="container">
-  <div id="loading" class="skeleton-wrap">
-    <div class="skeleton-card"><div class="skeleton-element skeleton-title"></div><div class="skeleton-element skeleton-value"></div></div>
-    <div class="skeleton-card"><div class="skeleton-element skeleton-title"></div><div class="skeleton-element skeleton-value"></div></div>
-    <div class="skeleton-card"><div class="skeleton-element skeleton-title"></div><div class="skeleton-element skeleton-value"></div></div>
-    <div class="skeleton-card"><div class="skeleton-element skeleton-title"></div><div class="skeleton-element skeleton-value"></div></div>
-  </div>
-
-  <div id="main" style="display:none">
+  <div id="main">
     <div class="filter-wrapper">
       <div class="filter-bar">
         <div>
@@ -407,7 +403,13 @@
 
       <div id="stale-banner-wrap"></div>
       <div id="notes-banner-wrap"></div>
-      <div class="grid4" id="ov-metrics"></div>
+      
+      <div class="grid4" id="ov-metrics">
+        <div class="metric-card"><span class="skeleton sk-label"></span><span class="skeleton sk-val"></span><span class="skeleton sk-delta"></span></div>
+        <div class="metric-card"><span class="skeleton sk-label"></span><span class="skeleton sk-val"></span><span class="skeleton sk-delta"></span></div>
+        <div class="metric-card"><span class="skeleton sk-label"></span><span class="skeleton sk-val"></span><span class="skeleton sk-delta"></span></div>
+        <div class="metric-card"><span class="skeleton sk-label"></span><span class="skeleton sk-val"></span><span class="skeleton sk-delta"></span></div>
+      </div>
 
       <h2 style="font-size:15px;font-weight:600;margin-bottom:14px;color:var(--text)">Ringkasan Performa per Website</h2>
       <div class="site-cards" id="site-cards"></div>
@@ -783,12 +785,7 @@ function setProgress(state) {
 }
 
 function revealMainContent() {
-  const loadingEl = document.getElementById('loading');
-  const mainEl = document.getElementById('main');
-  loadingEl.classList.add('fade-out');
-  mainEl.style.display = 'block';
-  mainEl.classList.add('reveal');
-  setTimeout(() => { loadingEl.style.display = 'none'; }, prefersReducedMotion ? 0 : 320);
+  // Langsung perbarui ukuran teks utama marquee tanpa efek bergeser
   updateBrandMarquee();
 }
 
@@ -832,8 +829,8 @@ async function loadData() {
 
     populateFilters();
     applyFilters();
-    if (!cacheFirst) revealMainContent();
-    else showToast('Data diperbarui (' + timeStr + ' WIB).');
+    revealMainContent();
+    if (cacheFirst) showToast('Data diperbarui (' + timeStr + ' WIB).');
   } catch (e) {
     if (cacheFirst) {
       setProgress('idle');
@@ -842,7 +839,7 @@ async function loadData() {
     }
     setProgress('idle');
     setStatus('error');
-    document.getElementById('loading').style.display = 'none';
+    document.getElementById('ov-metrics').style.display = 'none';
     document.getElementById('error').style.display = 'block';
     document.getElementById('error').innerHTML =
       'Gagal memuat data: ' + (e.message || 'periksa koneksi internet Anda') +
@@ -1015,13 +1012,18 @@ function makeLegend(elId, sites) {
   ).join('');
 }
 
+// INDIKATOR PERFORMA METRIK UTAMA (Mencegah Layout Shift)
 function calculateDelta(currentVal, metricName) {
   const siteFilter = document.getElementById('f-site').value;
   const yearFilter = document.getElementById('f-year').value;
   const monthFilter = document.getElementById('f-month').value;
 
+  // Jika filter bulan/tahun tidak dipilih, cetak teks deskriptif pengisi ruang
   if (!yearFilter || !monthFilter || currentVal === null || currentVal === 0) {
-    return { html: '', class: 'neutral' };
+    let desc = "Total akumulasi sesi terfilter";
+    if(metricName === 'wa') desc = "Jumlah klik tombol WhatsApp";
+    if(metricName === 'engage') desc = "Rata-rata interaksi aktif halaman";
+    return `<div class="metric-sub">${desc}</div>`;
   }
 
   let prevMonth = parseInt(monthFilter) - 1;
@@ -1035,7 +1037,9 @@ function calculateDelta(currentVal, metricName) {
     (!siteFilter || d.site === siteFilter) && d.y === prevYear && d.m === prevMonth
   );
 
-  if (!prevData.length) return { html: '', class: 'neutral' };
+  if (!prevData.length) {
+    return `<div class="metric-sub">Tidak ada pembanding bulan lalu</div>`;
+  }
 
   let prevVal = 0;
   if (metricName === 'total' || metricName === 'wa') {
@@ -1044,16 +1048,15 @@ function calculateDelta(currentVal, metricName) {
     prevVal = avgOrNull(prevData.map(x => x[metricName])) || 0;
   }
 
-  if (prevVal === 0 || prevVal === null) return { html: '', class: 'neutral' };
+  if (prevVal === 0 || prevVal === null) {
+    return `<div class="metric-sub">Data pembanding bulan lalu bernilai nol</div>`;
+  }
 
   const pctChange = ((currentVal - prevVal) / prevVal) * 100;
   const sign = pctChange > 0 ? '▲' : pctChange < 0 ? '▼' : '•';
   const cls = pctChange > 0 ? 'up' : pctChange < 0 ? 'down' : 'neutral';
 
-  return {
-    html: `<div class="metric-delta ${cls}"><span>${sign}</span> <span>${Math.abs(pctChange).toFixed(1)}%</span> <span style="color:var(--text3); font-weight:400">vs bulan lalu</span></div>`,
-    class: cls
-  };
+  return `<div class="metric-delta ${cls}"><span>${sign}</span> <span>${Math.abs(pctChange).toFixed(1)}%</span> <span style="color:var(--text3); font-weight:400">vs bulan lalu</span></div>`;
 }
 
 function calculateSiteDelta(site, currentVal, metricName, currentMonth, currentYear) {
@@ -1110,36 +1113,37 @@ function renderOverview() {
   });
   const topGlobalCountries = Object.entries(countryCounts).sort((a, b) => b[1] - a[1]).slice(0, 2).map(e => e[0]).join(', ') || '-';
 
-  const visitsDelta = calculateDelta(totalVisits, 'total');
-  const waDelta = calculateDelta(totalWA, 'wa');
-  const engageDelta = calculateDelta(avgEngage, 'engage');
+  const visitsDeltaHtml = calculateDelta(totalVisits, 'total');
+  const waDeltaHtml = calculateDelta(totalWA, 'wa');
+  const engageDeltaHtml = calculateDelta(avgEngage, 'engage');
 
+  // Inject isi kartu dengan struktur data yang sudah terhitung indikator kinerjanya
   document.getElementById('ov-metrics').innerHTML = `
     <div class="metric-card">
       <div class="metric-label">Total Visitor Sessions</div>
       <div class="metric-val" id="count-visits">0</div>
-      ${visitsDelta.html ? visitsDelta.html : `<div class="metric-sub">Total sesi kunjungan terfilter</div>`}
+      <div class="metric-delta-wrap">${visitsDeltaHtml}</div>
     </div>
     <div class="metric-card">
       <div class="metric-label">WhatsApp Leads</div>
       <div class="metric-val" id="count-wa">0</div>
-      ${waDelta.html ? waDelta.html : `<div class="metric-sub">Jumlah klik tombol WhatsApp</div>`}
+      <div class="metric-delta-wrap">${waDeltaHtml}</div>
     </div>
     <div class="metric-card">
       <div class="metric-label">Avg. Engagement Rate</div>
       <div class="metric-val" id="count-engage">0%</div>
-      ${engageDelta.html ? engageDelta.html : `<div class="metric-sub">Rata-rata interaksi aktif halaman</div>`}
+      <div class="metric-delta-wrap">${engageDeltaHtml}</div>
     </div>
     <div class="metric-card">
       <div class="metric-label">Top Visitor Origin</div>
-      <div class="metric-val" style="font-size: 20px; padding-top: 6px; font-weight:700; color:var(--accent)">${escapeHtml(topGlobalCountries)}</div>
-      <div class="metric-sub">Kontribusi asal traffic tertinggi</div>
+      <div class="metric-val" style="font-size: 20px; font-weight:700; color:var(--accent); display:flex; align-items:center; height:31px; line-height:31px; margin:6px 0;">${escapeHtml(topGlobalCountries)}</div>
+      <div class="metric-delta-wrap"><div class="metric-sub">Kontribusi asal traffic tertinggi</div></div>
     </div>
   `;
 
-  animateValue(document.getElementById('count-visits'), 0, totalVisits, 800);
-  animateValue(document.getElementById('count-wa'), 0, totalWA, 800);
-  animateValue(document.getElementById('count-engage'), 0, avgEngage, 800, true);
+  animateValue(document.getElementById('count-visits'), 0, totalVisits, 650);
+  animateValue(document.getElementById('count-wa'), 0, totalWA, 650);
+  animateValue(document.getElementById('count-engage'), 0, avgEngage, 650, true);
 
   const sites = allSites();
   document.getElementById('site-cards').innerHTML = sites.map((site, i) => {
@@ -1262,10 +1266,10 @@ function renderOverview() {
   });
 
   const siteWA = sites.map(s => sumOrNull(filtered.filter(d=>d.site===s).map(d=>d.wa)) || 0);
-  const isWaEmpty = siteWA.every(v => v === 0);
+  const isWiEmpty = siteWA.every(v => v === 0);
   makeLegend('leg-wa', sites);
   destroyChart('wa-bar');
-  checkEmptyChartState('card-ch-wa-bar', isWaEmpty);
+  checkEmptyChartState('card-ch-wa-bar', isWiEmpty);
   
   charts['wa-bar'] = new Chart(document.getElementById('ch-wa-bar'), {
     type: 'bar',
