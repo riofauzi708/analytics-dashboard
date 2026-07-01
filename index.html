@@ -3,12 +3,12 @@
 <head>
 <link rel="icon" type="image/png" href="dashboard-analytics.png">
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Enterprise Web Analytics Dashboard</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"></script>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  
+
   :root {
     --bg: #f8f9fa;
     --surface: #ffffff;
@@ -21,6 +21,7 @@
     --accent-light: rgba(42, 120, 214, 0.08);
     --success: #1baf7a;
     --danger: #e34948;
+    --warning: #eda100;
     --radius: 12px;
     --shadow: 0 2px 12px rgba(0,0,0,0.04);
     --shadow-hover: 0 8px 24px rgba(0,0,0,0.08);
@@ -45,18 +46,36 @@
   }
 
   body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; -webkit-font-smoothing: antialiased; transition: background 0.3s ease, color 0.3s ease; padding-bottom: 2rem; }
-  
-  .navbar { background: var(--surface); border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 200; transition: background 0.3s ease, border-color 0.3s ease; }
-  .navbar-row { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
+
+  /* ===== Top progress bar (visible on every breakpoint, signals fetch activity) ===== */
+  .top-progress { position: fixed; top: 0; left: 0; height: 3px; width: 0%; background: linear-gradient(90deg, var(--accent), #7fb3f5, var(--accent)); background-size: 200% 100%; z-index: 300; opacity: 0; transition: opacity .25s ease; pointer-events: none; }
+  .top-progress.active { opacity: 1; width: 60%; animation: progressSlide 1.1s ease-in-out infinite; }
+  .top-progress.done { opacity: 1; width: 100%; animation: none; transition: width .3s ease, opacity .3s ease .25s; }
+  @keyframes progressSlide { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+  .navbar { background: var(--surface); border-bottom: 1px solid var(--border); position: -webkit-sticky; position: sticky; top: 0; z-index: 200; transition: background 0.3s ease, border-color 0.3s ease; padding-top: env(safe-area-inset-top, 0px); }
+  .navbar-row { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; padding-left: max(1.5rem, env(safe-area-inset-left)); padding-right: max(1.5rem, env(safe-area-inset-right)); height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
   .navbar-brand { font-size: 16px; font-weight: 600; letter-spacing: -0.3px; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
-  
+
   /* Area Navigasi Utama Desktop */
   .navbar-left-group { display: flex; align-items: center; gap: 24px; }
   .navbar-menu { display: flex; align-items: center; gap: 4px; }
-  
+
   /* Posisi Ujung Kanan Navbar */
   .navbar-right { display: flex; align-items: center; gap: 12px; margin-left: auto; }
-  .last-updated-text { font-size: 12px; color: var(--text3); font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+  /* ===== Status indicator: replaces the old last-updated-text.
+     Unlike before, this stays visible at every breakpoint — only the
+     label swaps between a full and a compact form via CSS, nothing
+     is ever display:none. ===== */
+  .status-indicator { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text3); font-variant-numeric: tabular-nums; white-space: nowrap; padding: 6px 10px; border-radius: 20px; background: var(--surface2); border: 1px solid var(--border); }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text3); flex-shrink: 0; }
+  .status-dot.loading { background: var(--accent); animation: statusPulse 1s ease-in-out infinite; }
+  .status-dot.success { background: var(--success); animation: statusPulse 2.4s ease-in-out infinite; }
+  .status-dot.stale { background: var(--warning); }
+  .status-dot.error { background: var(--danger); }
+  @keyframes statusPulse { 0%, 100% { opacity: 1; transform: scale(1); } 50% { opacity: .45; transform: scale(.7); } }
+  .status-text-short { display: none; }
 
   .theme-toggle { background: var(--surface2); border: 1px solid var(--border); width: 38px; height: 38px; border-radius: 10px; cursor: pointer; font-size: 15px; display: flex; align-items: center; justify-content: center; transition: all 0.2s ease; }
   .theme-toggle:hover { border-color: var(--text3); background: var(--surface); transform: translateY(-1px); }
@@ -66,28 +85,28 @@
   .nav-toggle:hover { border-color: var(--text3); }
 
   .container { max-width: 1280px; margin: 0 auto; padding: 1.5rem; }
-  
+
   /* Filter Area Base Layout */
-  .filter-wrapper { position: sticky; top: 64px; z-index: 100; background: linear-gradient(to bottom, var(--bg) 85%, rgba(0,0,0,0)); padding: 1rem 0 1.5rem 0; }
+  .filter-wrapper { position: -webkit-sticky; position: sticky; top: calc(64px + env(safe-area-inset-top, 0px)); z-index: 100; background: linear-gradient(to bottom, var(--bg) 85%, rgba(0,0,0,0)); padding: 1rem 0 1.5rem 0; }
   .filter-bar { display: flex; gap: 16px; align-items: flex-end; background: var(--surface); padding: 1.25rem; border-radius: var(--radius); border: 1px solid var(--border); box-shadow: var(--shadow); transition: background 0.3s ease, border-color 0.3s ease; }
   .filter-bar > div { display: flex; flex-direction: column; gap: 6px; flex: 1; }
   .filter-bar label { font-size: 11px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
-  
+
   select, .search-input { width: 100%; padding: 0 12px; border: 1px solid var(--border); border-radius: 8px; background: var(--surface2); color: var(--text); font-size: 13px; cursor: pointer; height: 40px; transition: all 0.2s ease; -webkit-appearance: none; appearance: none; }
   select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%23868e96'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 12px center; background-size: 14px; padding-right: 35px; }
   select:focus, .search-input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
   .search-input { cursor: text; }
-  
+
   .btn { height: 40px; padding: 0 20px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; display: inline-flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--border); background: var(--surface2); color: var(--text2); transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); white-space: nowrap; }
   .btn:hover { background: var(--surface); color: var(--text); border-color: var(--text3); transform: translateY(-1px); }
   .btn-accent { background: var(--accent); color: #fff; border: none; }
   .btn-accent:hover { background: var(--accent); opacity: 0.95; color: #fff; box-shadow: 0 4px 12px var(--accent-light); }
   .btn-danger-outline { color: var(--danger); border-color: rgba(227, 73, 72, 0.15); background: transparent; }
   .btn-danger-outline:hover { background: rgba(227, 73, 72, 0.06); border-color: var(--danger); color: var(--danger); }
-  
+
   .grid4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; margin-bottom: 1.5rem; }
   .grid2 { display: grid; grid-template-columns: repeat(auto-fit, minmax(480px, 1fr)); gap: 20px; margin-bottom: 1.5rem; }
-  
+
   .metric-card { background: var(--surface); border-radius: var(--radius); padding: 1.5rem; border: 1px solid var(--border); box-shadow: var(--shadow); transition: transform 0.2s ease, box-shadow 0.2s ease; }
   .metric-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
   .metric-label { font-size: 12px; color: var(--text3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.3px; margin-bottom: 8px; }
@@ -97,20 +116,20 @@
   .metric-delta.down { color: var(--danger); }
   .metric-delta.neutral { color: var(--text3); }
   .metric-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
-  
+
   .card { background: var(--surface); border-radius: var(--radius); padding: 1.5rem; border: 1px solid var(--border); box-shadow: var(--shadow); position: relative; overflow: hidden; transition: background 0.3s ease, border-color 0.3s ease; }
   .card-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; gap: 10px; }
   .card h2 { font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -0.1px; }
   .chart-wrap { position: relative; width: 100%; }
-  
+
   .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
   .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); font-weight: 500; }
   .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  
+
   .tab { height: 40px; display: inline-flex; align-items: center; padding: 0 16px; font-size: 13.5px; font-weight: 500; cursor: pointer; border: none; background: none; color: var(--text3); border-radius: 8px; transition: all 0.2s ease; white-space: nowrap; }
   .tab.active { color: var(--accent); background: var(--accent-light); font-weight: 600; }
   .tab:hover:not(.active) { color: var(--text); background: var(--surface2); }
-  
+
   .section { display: none; animation: fadeIn 0.3s ease-out; }
   .section.active { display: block; }
   @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
@@ -119,7 +138,7 @@
   .badge-green { background: rgba(27, 175, 122, 0.12); color: var(--success); }
   .badge-blue { background: var(--accent-light); color: var(--accent); }
   .badge-red { background: rgba(227, 73, 72, 0.12); color: var(--danger); }
-  
+
   .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; border: 1px solid var(--border); max-height: 70vh; overflow-y: auto; position: relative; }
   table { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 900px; text-align: left; }
   th { padding: 12px 16px; color: var(--text3); font-weight: 600; font-size: 11px; background: var(--surface2); text-transform: uppercase; letter-spacing: 0.5px; border-bottom: 1px solid var(--border); position: sticky; top: 0; z-index: 5; box-shadow: 0 1px 0 var(--border); }
@@ -127,7 +146,7 @@
   tr:last-child td { border-bottom: none; }
   tr:hover td { background: var(--surface2); }
   tr.hidden-row { display: none; }
-  
+
   .site-cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 16px; margin-bottom: 1.5rem; }
   .site-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.5rem; display: flex; flex-direction: column; box-shadow: var(--shadow); transition: background 0.3s ease, box-shadow 0.3s ease; }
   .site-card:hover { box-shadow: var(--shadow-hover); }
@@ -143,22 +162,22 @@
 
   .info-box { background: var(--accent-light); border: 1px solid rgba(42, 120, 214, 0.12); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1.5rem; }
   .info-box h3 { font-size: 14px; font-weight: 600; color: var(--text); margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
-  
+
   /* Pengaturan Utama Info Box agar Responsif */
-  .info-box ul { 
-    list-style: none; 
-    display: grid; 
+  .info-box ul {
+    list-style: none;
+    display: grid;
     grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); /* Diperkecil dari 280px agar pas di layar kecil */
-    gap: 12px 20px; 
+    gap: 12px 20px;
   }
-  .info-box li { 
-    font-size: 13px; 
-    color: var(--text2); 
-    line-height: 1.5; 
-    padding-left: 14px; 
-    position: relative; 
-    white-space: normal;       
-    word-wrap: break-word;     
+  .info-box li {
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.5;
+    padding-left: 14px;
+    position: relative;
+    white-space: normal;
+    word-wrap: break-word;
     overflow-wrap: break-word;
   }
   .info-box li::before { content: "•"; position: absolute; left: 0; color: var(--accent); font-weight: bold; }
@@ -170,14 +189,37 @@
   .notes-banner-item b { font-weight: 600; color: var(--text); flex-shrink: 0; }
   .na-val { color: var(--text3); font-style: italic; }
 
-  .skeleton-wrap { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
+  /* Offline / stale-data notice banner */
+  .stale-banner { display: flex; align-items: center; gap: 10px; background: rgba(237, 161, 0, 0.08); border: 1px solid rgba(237, 161, 0, 0.18); border-radius: var(--radius); padding: 0.85rem 1.1rem; margin-bottom: 1.5rem; font-size: 13px; color: var(--text2); animation: revealDown .35s ease both; }
+  .stale-banner b { color: var(--warning); }
+
+  .skeleton-wrap { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; transition: opacity .35s ease; }
+  .skeleton-wrap.fade-out { opacity: 0; }
   .skeleton-card { height: 120px; background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 1.5rem; }
   .skeleton-element { background: linear-gradient(90deg, var(--shimmer) 25%, var(--shimmer-glow) 37%, var(--shimmer) 63%); background-size: 400% 100%; animation: shimmer 1.4s ease infinite; border-radius: 4px; }
   .skeleton-title { height: 14px; width: 45%; margin-bottom: 14px; }
   .skeleton-value { height: 28px; width: 70%; }
   @keyframes shimmer { 0% { background-position: 100% 0; } 100% { background-position: 0 0; } }
-  .error-msg { text-align: center; padding: 4rem; color: var(--danger); font-size: 15px; font-weight: 500; }
+  .error-msg { text-align: center; padding: 4rem 1.5rem; color: var(--danger); font-size: 15px; font-weight: 500; }
+  .error-msg .btn { margin-top: 1.25rem; }
   .section-full { margin-bottom: 1.5rem; }
+
+  /* Gentle content reveal once data has finished loading. Applies once,
+     never re-triggers on filter changes, so it stays lightweight. */
+  #main.reveal { animation: revealUp .4s ease both; }
+  @keyframes revealUp { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  @keyframes revealDown { from { opacity: 0; transform: translateY(-6px); } to { opacity: 1; transform: translateY(0); } }
+
+  .grid4 .metric-card, .site-cards .site-card { animation: revealUp .35s ease both; }
+  .grid4 .metric-card:nth-child(1) { animation-delay: .02s; }
+  .grid4 .metric-card:nth-child(2) { animation-delay: .06s; }
+  .grid4 .metric-card:nth-child(3) { animation-delay: .10s; }
+  .grid4 .metric-card:nth-child(4) { animation-delay: .14s; }
+  .site-cards .site-card:nth-child(n) { animation-delay: calc(.03s * var(--i, 0)); }
+
+  /* Small toast for background-refresh notices (e.g. falling back to cached data) */
+  .toast { position: fixed; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%) translateY(12px); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-hover); padding: 11px 18px; border-radius: 10px; font-size: 13px; color: var(--text2); opacity: 0; transition: opacity .3s ease, transform .3s ease; z-index: 400; max-width: 90vw; text-align: center; pointer-events: none; }
+  .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 
   @media (max-width: 1024px) {
     .grid4 { grid-template-columns: repeat(2, 1fr); }
@@ -189,78 +231,97 @@
     .navbar-row { height: 56px; padding: 0 1rem; position: relative; }
     .nav-toggle { display: flex; order: 3; }
     .navbar-right { margin-left: initial; gap: 8px; order: 2; }
-    .last-updated-text { display: none; }
-    
-    .navbar-menu { 
-      display: none; 
-      position: absolute; 
-      top: 56px; left: 0; right: 0; 
-      flex-direction: column; 
-      align-items: stretch; 
-      gap: 4px; 
-      padding: 10px; 
-      background: var(--surface); 
-      border-bottom: 1px solid var(--border); 
-      box-shadow: 0 8px 16px rgba(0,0,0,0.06); 
+
+    /* Status indicator stays visible — it just switches to a compact
+       label instead of disappearing, so "Memuat data..." (and later
+       the updated/stale/error state) is always legible on mobile too. */
+    .status-indicator { padding: 5px 8px; gap: 5px; font-size: 11px; }
+    .status-text-full { display: none; }
+    .status-text-short { display: inline; }
+
+    .navbar-menu {
+      display: none;
+      position: absolute;
+      top: calc(56px + env(safe-area-inset-top, 0px)); left: 0; right: 0;
+      flex-direction: column;
+      align-items: stretch;
+      gap: 4px;
+      padding: 10px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      box-shadow: 0 8px 16px rgba(0,0,0,0.06);
       z-index: 199;
     }
     .navbar-menu.open { display: flex; }
     .tab { width: 100%; justify-content: flex-start; height: 42px; padding: 0 12px; }
 
-    .filter-wrapper { top: 56px; padding: 0.5rem 0; }
-    .filter-bar { 
-      display: grid; 
-      grid-template-columns: repeat(3, 1fr); 
-      gap: 8px; 
-      padding: 0.75rem; 
+    .filter-wrapper { top: calc(56px + env(safe-area-inset-top, 0px)); padding: 0.5rem 0; }
+    .filter-bar {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      padding: 0.75rem;
       border-radius: 8px;
     }
     .filter-bar > div { gap: 3px; }
     .filter-bar label { font-size: 10px; letter-spacing: 0; }
-    
-    select, .search-input { 
-      height: 32px; 
-      font-size: 12px; 
-      padding: 0 8px; 
+
+    select, .search-input {
+      height: 32px;
+      font-size: 12px;
+      padding: 0 8px;
       border-radius: 6px;
       background-position: right 8px center;
       background-size: 12px;
       padding-right: 24px;
     }
-    
-    .filter-bar .btn-danger-outline { 
-      grid-column: span 3; 
-      width: 100%; 
-      height: 30px; 
+
+    .filter-bar .btn-danger-outline {
+      grid-column: span 3;
+      width: 100%;
+      height: 30px;
       font-size: 12px;
       padding: 0;
       margin-top: 2px;
       border-radius: 6px;
     }
-    
+
     .grid4 { grid-template-columns: repeat(2, 1fr); gap: 12px; }
     .site-cards { grid-template-columns: 1fr; }
     .metric-card { padding: 1rem; }
     .metric-val { font-size: 22px; }
     .card { padding: 1rem; }
     .chart-wrap { height: 210px !important; }
-    
+
     /* Paksa 1 kolom penuh di mobile grid info-box */
     .info-box ul { grid-template-columns: 1fr; gap: 10px; }
   }
 
   @media (max-width: 480px) {
     .filter-bar { grid-template-columns: repeat(2, 1fr); }
-    .filter-bar > div:nth-child(1) { grid-column: span 2; } 
+    .filter-bar > div:nth-child(1) { grid-column: span 2; }
     .filter-bar .btn-danger-outline { grid-column: span 2; }
     .grid4 { grid-template-columns: 1fr; }
     .card-header-flex { flex-direction: column; align-items: stretch; gap: 10px; }
     .card-header-flex .btn { width: 100%; }
     table { min-width: 720px; }
   }
+
+  /* Respect users who've asked for reduced motion: keep every state
+     change instant instead of animated, without touching layout. */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 </style>
 </head>
 <body>
+
+<div class="top-progress" id="top-progress"></div>
 
 <nav class="navbar">
   <div class="navbar-row">
@@ -269,7 +330,7 @@
        <img src="dashboard-analytics.png" alt="Logo" style="height: 24px; width: auto; object-fit: contain;">
        Enterprise Web Analytics
       </div>
-      
+
       <div class="navbar-menu" id="navbar-menu">
         <button class="tab active" onclick="switchTab('overview')">Overview</button>
         <button class="tab" onclick="switchTab('trends')">Monthly Trends</button>
@@ -279,7 +340,11 @@
     </div>
 
     <div class="navbar-right">
-      <span id="last-updated" class="last-updated-text">Memuat data...</span>
+      <div class="status-indicator" id="status-indicator" role="status" aria-live="polite">
+        <span class="status-dot loading" id="status-dot"></span>
+        <span class="status-text-full" id="status-text-full">Memuat data...</span>
+        <span class="status-text-short" id="status-text-short">Memuat...</span>
+      </div>
       <button class="theme-toggle" id="theme-btn" onclick="toggleTheme()" aria-label="Ubah tema">🌙</button>
       <button class="nav-toggle" id="nav-toggle-btn" onclick="toggleNavMenu()" aria-label="Buka menu navigasi" aria-expanded="false">
         <span class="nav-toggle-bar"></span>
@@ -335,6 +400,7 @@
         </ul>
       </div>
 
+      <div id="stale-banner-wrap"></div>
       <div id="notes-banner-wrap"></div>
       <div class="grid4" id="ov-metrics"></div>
 
@@ -422,12 +488,20 @@ const MONTHS = ['','Jan','Feb','Mar','Apr','Mei','Jun','Jul','Agu','Sep','Okt','
 const MONTHS_FULL = ['','Januari','Februari','Maret','April','Mei','Juni','Juli','Agustus','September','Oktober','November','Desember'];
 const COLORS = ['#2a78d6','#1baf7a','#eda100','#8b5cf6','#e34948','#ec4899','#f97316','#10b981','#6b7280'];
 
+// ---- Reliability settings ----
+const CACHE_KEY = 'ewa_dashboard_cache_v1';
+const FETCH_TIMEOUT_MS = 12000;   // stop waiting on a stalled request instead of hanging forever
+const MAX_RETRIES = 2;            // quick automatic retries before giving up
+const RETRY_BASE_DELAY_MS = 700;  // exponential backoff between retries
+
 let allData = [];
 let filtered = [];
 let allNotes = [];
 let charts = {};
+let prefersReducedMotion = false;
 
 function initTheme() {
+  prefersReducedMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   const savedTheme = localStorage.getItem('theme');
   let targetTheme = 'light';
   if (savedTheme) {
@@ -523,6 +597,10 @@ function animateValue(obj, start, end, duration, isPercentage = false) {
     obj.innerHTML = '<span class="na-val">N/A</span>';
     return;
   }
+  if (prefersReducedMotion) {
+    obj.innerHTML = isPercentage ? (end.toFixed(2).replace(/\.00$/,'') + '%') : Math.floor(end).toLocaleString('id-ID');
+    return;
+  }
   let startTimestamp = null;
   const step = (timestamp) => {
     if (!startTimestamp) startTimestamp = timestamp;
@@ -540,31 +618,164 @@ function animateValue(obj, start, end, duration, isPercentage = false) {
   window.requestAnimationFrame(step);
 }
 
-async function loadData() {
+/* ============ Reliability helpers ============
+   Google's published-CSV endpoint has no SLA: it can be slow to
+   regenerate, briefly rate-limited, or just flaky on a bad connection.
+   These helpers stop a stalled request from hanging indefinitely,
+   retry transient failures automatically, and fall back to the last
+   successful pull (cached locally) so the dashboard still shows
+   something useful instead of a hard error. */
+
+function fetchWithTimeout(url, timeoutMs) {
+  // Some restrictive in-app WebViews (rare, but seen on iOS) can lack
+  // AbortController. Fall back to a plain fetch rather than crashing.
+  if (typeof AbortController === 'undefined') {
+    return fetch(url);
+  }
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeoutMs);
+  return fetch(url, { signal: controller.signal }).finally(() => clearTimeout(timer));
+}
+
+async function fetchWithRetry(url, retries, baseDelay) {
+  let lastErr;
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const res = await fetchWithTimeout(url, FETCH_TIMEOUT_MS);
+      if (!res.ok) throw new Error('HTTP ' + res.status);
+      return res;
+    } catch (err) {
+      lastErr = err.name === 'AbortError' ? new Error('Waktu tunggu habis') : err;
+      if (attempt < retries) {
+        await new Promise(r => setTimeout(r, baseDelay * Math.pow(2, attempt)));
+      }
+    }
+  }
+  throw lastErr;
+}
+
+function saveCache(data, notes) {
   try {
-    initTheme();
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ data, notes, ts: Date.now() }));
+  } catch (e) { /* storage full or unavailable — safe to ignore */ }
+}
+
+function loadCache() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY);
+    return raw ? JSON.parse(raw) : null;
+  } catch (e) { return null; }
+}
+
+function setStatus(state, timeText) {
+  const dot = document.getElementById('status-dot');
+  const full = document.getElementById('status-text-full');
+  const short = document.getElementById('status-text-short');
+  dot.className = 'status-dot ' + state;
+  if (state === 'loading') {
+    full.textContent = 'Memuat data...';
+    short.textContent = 'Memuat...';
+  } else if (state === 'success') {
+    full.textContent = 'Update: ' + timeText + ' WIB';
+    short.textContent = timeText;
+  } else if (state === 'stale') {
+    full.textContent = 'Data tersimpan • ' + timeText;
+    short.textContent = timeText + ' (offline)';
+  } else if (state === 'error') {
+    full.textContent = 'Gagal memuat data';
+    short.textContent = 'Gagal';
+  }
+}
+
+function showToast(msg) {
+  let t = document.getElementById('toast');
+  if (!t) {
+    t = document.createElement('div');
+    t.id = 'toast';
+    t.className = 'toast';
+    document.body.appendChild(t);
+  }
+  t.textContent = msg;
+  requestAnimationFrame(() => t.classList.add('show'));
+  clearTimeout(t._hideTimer);
+  t._hideTimer = setTimeout(() => t.classList.remove('show'), 4500);
+}
+
+function setProgress(state) {
+  const bar = document.getElementById('top-progress');
+  if (state === 'active') {
+    bar.classList.remove('done');
+    bar.classList.add('active');
+  } else if (state === 'done') {
+    bar.classList.remove('active');
+    bar.classList.add('done');
+    setTimeout(() => bar.classList.remove('done'), 350);
+  } else {
+    bar.classList.remove('active', 'done');
+  }
+}
+
+function revealMainContent() {
+  const loadingEl = document.getElementById('loading');
+  const mainEl = document.getElementById('main');
+  loadingEl.classList.add('fade-out');
+  mainEl.style.display = 'block';
+  mainEl.classList.add('reveal');
+  setTimeout(() => { loadingEl.style.display = 'none'; }, prefersReducedMotion ? 0 : 320);
+}
+
+async function loadData() {
+  initTheme();
+  setProgress('active');
+  setStatus('loading');
+
+  try {
     const [res, notesRes] = await Promise.all([
-      fetch(SHEET_CSV + '&t=' + Date.now()),
-      fetch(NOTES_CSV + '&t=' + Date.now()).catch(() => null)
+      fetchWithRetry(SHEET_CSV + '&t=' + Date.now(), MAX_RETRIES, RETRY_BASE_DELAY_MS),
+      fetchWithRetry(NOTES_CSV + '&t=' + Date.now(), MAX_RETRIES, RETRY_BASE_DELAY_MS).catch(() => null)
     ]);
-    if (!res.ok) throw new Error('Tidak dapat memuat data');
+
     const text = await res.text();
-    allData = processData(parseCSV(text));
-    if (!allData.length) throw new Error('Format data tidak valid atau kosong');
+    const parsed = processData(parseCSV(text));
+    if (!parsed.length) throw new Error('Format data tidak valid atau kosong');
+    allData = parsed;
 
     if (notesRes && notesRes.ok) {
-      try { allNotes = processNotes(parseCSV(await notesRes.text())); } catch(e) { allNotes = []; }
+      try { allNotes = processNotes(parseCSV(await notesRes.text())); } catch (e) { allNotes = []; }
     }
 
-    document.getElementById('last-updated').textContent = 'Update: ' + new Date().toLocaleTimeString('id-ID', {hour: '2-digit', minute:'2-digit'}) + ' WIB';
+    saveCache(allData, allNotes);
+    const timeStr = new Date().toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+    setStatus('success', timeStr);
+    setProgress('done');
+
     populateFilters();
     applyFilters();
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('main').style.display = 'block';
-  } catch(e) {
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('error').style.display = 'block';
-    document.getElementById('error').textContent = 'Error: ' + e.message;
+    revealMainContent();
+  } catch (e) {
+    const cached = loadCache();
+    if (cached && cached.data && cached.data.length) {
+      // Network failed, but we have something to show — degrade gracefully
+      // instead of showing a blank error screen.
+      allData = cached.data;
+      allNotes = cached.notes || [];
+      const cachedTime = new Date(cached.ts).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit' });
+      setStatus('stale', cachedTime);
+      setProgress('done');
+
+      populateFilters();
+      applyFilters();
+      revealMainContent();
+      showToast('Koneksi bermasalah — menampilkan data tersimpan terakhir (' + cachedTime + ' WIB).');
+    } else {
+      setProgress('idle');
+      setStatus('error');
+      document.getElementById('loading').style.display = 'none';
+      document.getElementById('error').style.display = 'block';
+      document.getElementById('error').innerHTML =
+        'Gagal memuat data: ' + (e.message || 'periksa koneksi internet Anda') +
+        '<br><button class="btn btn-accent" onclick="location.reload()">Coba Lagi</button>';
+    }
   }
 }
 
@@ -572,7 +783,7 @@ function populateFilters() {
   const sites = [...new Set(allData.map(d => d.site))].sort();
   const years = [...new Set(allData.map(d => d.y))].sort();
   const months = [...new Set(allData.map(d => d.m))].sort((a,b) => a-b);
-  
+
   document.getElementById('f-site').innerHTML = '<option value="">Semua Website</option>' + sites.map(s => `<option>${s}</option>`).join('');
   document.getElementById('f-year').innerHTML = '<option value="">Semua</option>' + years.map(y => `<option>${y}</option>`).join('');
   document.getElementById('f-month').innerHTML = '<option value="">Semua</option>' + months.map(m => `<option value="${m}">${MONTHS[m]}</option>`).join('');
@@ -582,11 +793,12 @@ function applyFilters() {
   const site = document.getElementById('f-site').value;
   const year = document.getElementById('f-year').value;
   const month = document.getElementById('f-month').value;
-  
+
   filtered = allData.filter(d =>
     (!site || d.site === site) && (!year || d.y == year) && (!month || d.m == month)
   );
-  
+
+  renderStaleBanner();
   renderNotesBanner();
   renderOverview();
   renderTrends();
@@ -612,6 +824,16 @@ function liveSearchTable() {
       row.classList.add('hidden-row');
     }
   });
+}
+
+function renderStaleBanner() {
+  const wrap = document.getElementById('stale-banner-wrap');
+  const dot = document.getElementById('status-dot');
+  if (dot && dot.classList.contains('stale')) {
+    wrap.innerHTML = `<div class="stale-banner">⚠️ <span><b>Mode offline:</b> menampilkan data hasil sinkronisasi terakhir karena koneksi ke sumber data sedang bermasalah. Data terbaru akan otomatis tampil saat halaman dimuat ulang dengan koneksi yang stabil.</span></div>`;
+  } else {
+    wrap.innerHTML = '';
+  }
 }
 
 function renderNotesBanner() {
@@ -654,7 +876,7 @@ function calculateDelta(currentVal, metricName) {
     prevYear -= 1;
   }
 
-  const prevData = allData.filter(d => 
+  const prevData = allData.filter(d =>
     (!siteFilter || d.site === siteFilter) && d.y === prevYear && d.m === prevMonth
   );
 
@@ -672,7 +894,7 @@ function calculateDelta(currentVal, metricName) {
   const pctChange = ((currentVal - prevVal) / prevVal) * 100;
   const sign = pctChange > 0 ? '▲' : pctChange < 0 ? '▼' : '•';
   const cls = pctChange > 0 ? 'up' : pctChange < 0 ? 'down' : 'neutral';
-  
+
   return {
     html: `<div class="metric-delta ${cls}"><span>${sign}</span> <span>${Math.abs(pctChange).toFixed(1)}%</span> <span style="color:var(--text3); font-weight:400">vs bulan lalu</span></div>`,
     class: cls
@@ -731,12 +953,12 @@ function renderOverview() {
   animateValue(document.getElementById('count-engage'), 0, avgEngage, 800, true);
 
   const sites = allSites();
-  document.getElementById('site-cards').innerHTML = sites.map(site => {
+  document.getElementById('site-cards').innerHTML = sites.map((site, i) => {
     const rows = filtered.filter(d => d.site === site).sort((a,b) => b.y-a.y || b.m-a.m);
     if (!rows.length) return '';
     const r = rows[0];
     const pLabel = rows.length > 1 ? `${MONTHS[rows[rows.length-1].m]} ${rows[rows.length-1].y} - ${MONTHS[r.m]} ${r.y}` : `${MONTHS_FULL[r.m]} ${r.y}`;
-    
+
     const siteCountryCounts = {};
     rows.forEach(d => {
       if (d.countries) {
@@ -751,7 +973,7 @@ function renderOverview() {
     const topSiteCountries = Object.entries(siteCountryCounts).sort((a, b) => b[1] - a[1]).slice(0, 2).map(e => e[0]).join(', ') || '-';
 
     return `
-      <div class="site-card">
+      <div class="site-card" style="--i:${i}">
         <h3>${site}</h3>
         <div class="site-period">${pLabel}</div>
         <div class="site-stat-row"><span class="site-stat-label">Avg. Visitors/Day</span><span class="site-stat-val">${fmtNum(rows.length > 1 ? Math.round(avgOrNull(rows.map(x=>x.daily))) : r.daily)}</span></div>
@@ -833,12 +1055,12 @@ function renderCompare() {
   const sites = allSites();
   const txtColor = getChartTextColor();
   const gridColor = getChartGridColor();
-  
+
   // Ambil data rata-rata angka persentase dengan benar
   const siteEngage = sites.map(s => { const v = avgOrNull(filtered.filter(d=>d.site===s).map(d=>d.engage)); return v === null ? 0 : +v.toFixed(1); });
   const siteBounce = sites.map(s => { const v = avgOrNull(filtered.filter(d=>d.site===s).map(d=>d.bounce)); return v === null ? 0 : +v.toFixed(1); });
   const siteEvents = sites.map(s => sumOrNull(filtered.filter(d=>d.site===s).map(d=>d.events)) || 0);
-  
+
   // Bersihkan nama domain agar rapi di label bawah grafik (X-axis)
   const labels = sites.map(s => s.replace('.com','').replace('.co.id','').replace('.id',''));
 
@@ -846,18 +1068,18 @@ function renderCompare() {
   destroyChart('cmp-engage');
   charts['cmp-engage'] = new Chart(document.getElementById('ch-cmp-engage'), {
     type: 'bar',
-    data: { 
+    data: {
       labels: labels, // Nama website ditaruh di sini sebagai label bawah
-      datasets: [{ data: siteEngage, backgroundColor: '#2a78d6', borderRadius: 4 }] 
+      datasets: [{ data: siteEngage, backgroundColor: '#2a78d6', borderRadius: 4 }]
     },
-    options: { 
-      responsive: true, 
-      maintainAspectRatio: false, 
-      plugins: { legend: { display: false } }, 
-      scales: { 
-        y: { ticks: { color: txtColor, callback: v => v+'%' }, grid: { color: gridColor }, min: 0, max: 100 }, 
-        x: { ticks: { color: txtColor, autoSkip: false, maxRotation: 45, minRotation: 45 }, grid: { display: false } } 
-      } 
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { ticks: { color: txtColor, callback: v => v+'%' }, grid: { color: gridColor }, min: 0, max: 100 },
+        x: { ticks: { color: txtColor, autoSkip: false, maxRotation: 45, minRotation: 45 }, grid: { display: false } }
+      }
     }
   });
 
@@ -865,18 +1087,18 @@ function renderCompare() {
   destroyChart('cmp-bounce');
   charts['cmp-bounce'] = new Chart(document.getElementById('ch-cmp-bounce'), {
     type: 'bar',
-    data: { 
+    data: {
       labels: labels, // Nama website ditaruh di sini sebagai label bawah
-      datasets: [{ data: siteBounce, backgroundColor: '#e34948', borderRadius: 4 }] 
+      datasets: [{ data: siteBounce, backgroundColor: '#e34948', borderRadius: 4 }]
     },
-    options: { 
-      responsive: true, 
-      maintainAspectRatio: false, 
-      plugins: { legend: { display: false } }, 
-      scales: { 
-        y: { ticks: { color: txtColor, callback: v => v+'%' }, grid: { color: gridColor }, min: 0, max: 100 }, 
-        x: { ticks: { color: txtColor, autoSkip: false, maxRotation: 45, minRotation: 45 }, grid: { display: false } } 
-      } 
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: { ticks: { color: txtColor, callback: v => v+'%' }, grid: { color: gridColor }, min: 0, max: 100 },
+        x: { ticks: { color: txtColor, autoSkip: false, maxRotation: 45, minRotation: 45 }, grid: { display: false } }
+      }
     }
   });
 
@@ -893,7 +1115,7 @@ function renderCompare() {
 function renderTable() {
   const sorted = [...filtered].sort((a,b) => b.y-a.y || b.m-a.m || a.site.localeCompare(b.site));
   if (!sorted.length) { document.getElementById('tbl-wrap').innerHTML = '<div style="padding:3rem;text-align:center;color:var(--text3);;">Tidak ada data yang ditemukan.</div>'; return; }
-  
+
   document.getElementById('tbl-wrap').innerHTML = `
     <table>
       <thead><tr><th>Website</th><th>Bulan</th><th>Tahun</th><th>Visitors/Day</th><th>Total Sessions</th><th>Engagement</th><th>Bounce Rate</th><th>Total Events</th><th>WA Leads</th><th>Top Origin</th></tr></thead>
@@ -932,13 +1154,13 @@ function switchTab(name) {
   const tabNames = ['overview','trends','compare','table'];
   document.querySelectorAll('.navbar-menu .tab').forEach((t, i) => t.classList.toggle('active', tabNames[i] === name));
   document.querySelectorAll('.section').forEach((s, i) => s.classList.toggle('active', 'tab-'+tabNames[i] === 'tab-'+name));
-  
+
   const menu = document.getElementById('navbar-menu');
   if (menu.classList.contains('open')) {
     menu.classList.remove('open');
     document.getElementById('nav-toggle-btn').setAttribute('aria-expanded', 'false');
   }
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  window.scrollTo({ top: 0, behavior: prefersReducedMotion ? 'auto' : 'smooth' });
 }
 
 loadData();
