@@ -122,6 +122,9 @@
 
   .card { background: var(--surface); border-radius: var(--radius); padding: 1.5rem; border: 1px solid var(--border); box-shadow: var(--shadow); position: relative; overflow: hidden; transition: background 0.3s ease, border-color 0.3s ease; }
   .card-header-flex { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.25rem; gap: 10px; }
+  .card-header-flex > * { min-width: 0; }
+  .search-group { display: flex; align-items: center; gap: 10px; flex: 1 1 200px; min-width: 0; }
+  .search-group .search-input { min-width: 0; }
   .card h2 { font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -0.1px; }
   .chart-wrap { position: relative; width: 100%; }
 
@@ -302,6 +305,20 @@
     table { min-width: 720px; }
   }
 
+  /* ===== Mobile filter bar =====
+     On phones, the fluid flex-wrap layout above can still land the three
+     selects in an awkward order/size. Force the exact stacked arrangement
+     — Website full width, Year + Month side by side, Reset full width —
+     at a noticeably more compact size than desktop/tablet. */
+  @media (max-width: 640px) {
+    .filter-bar { padding: 0.7rem; gap: 8px; border-radius: 10px; }
+    .filter-bar > div:nth-child(1) { flex-basis: 100%; }
+    .filter-bar > div:nth-child(2), .filter-bar > div:nth-child(3) { flex: 1 1 calc(50% - 4px); min-width: 0; }
+    .filter-bar .btn-danger-outline { flex-basis: 100%; height: 36px; font-size: 12.5px; }
+    .filter-bar label { font-size: 10.5px; }
+    .filter-bar select { height: 36px; font-size: 12.5px; padding: 0 10px; padding-right: 28px; background-position: right 10px center; background-size: 12px; }
+  }
+
   /* Respect users who've asked for reduced motion: keep every state
      change instant instead of animated, without touching layout. */
   @media (prefers-reduced-motion: reduce) {
@@ -467,7 +484,7 @@
     <div id="tab-table" class="section">
       <div class="card">
         <div class="card-header-flex">
-          <div style="display:flex; align-items:center; gap:10px; flex:1; min-width:260px;">
+          <div class="search-group">
             <input type="text" id="table-search" class="search-input" placeholder="Cari berdasarkan negara, domain, atau bulan..." onkeyup="liveSearchTable()">
           </div>
           <button class="btn btn-accent" onclick="exportCSV()">Export CSV</button>
