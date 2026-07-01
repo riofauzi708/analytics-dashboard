@@ -267,7 +267,7 @@
     .filter-bar label { font-size: 10px; letter-spacing: 0; }
 
     select, .search-input {
-      height: 32px;
+      height: 38px;
       font-size: 12px;
       padding: 0 8px;
       border-radius: 6px;
@@ -279,7 +279,7 @@
     .filter-bar .btn-danger-outline {
       grid-column: span 3;
       width: 100%;
-      height: 30px;
+      height: 36px;
       font-size: 12px;
       padding: 0;
       margin-top: 2px;
@@ -582,6 +582,21 @@ function fmtNum(v) { return (v === null || v === undefined) ? '<span class="na-v
 function fmtPct(v) { return (v === null || v === undefined) ? '<span class="na-val">N/A</span>' : v.toFixed(2).replace(/\.00$/,'') + '%'; }
 function fmtPlain(v) { return (v === null || v === undefined) ? '-' : v.toLocaleString('id-ID'); }
 
+// Spreadsheet content (site names, notes, country codes) comes from a
+// Google Sheet that may be edited by non-technical staff. It's injected
+// via innerHTML in several places below, so it must be escaped first —
+// otherwise a stray "<" or a pasted HTML snippet in a note could render
+// as live markup/script instead of plain text.
+function escapeHtml(str) {
+  if (str === null || str === undefined) return '';
+  return String(str)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
 function avgOrNull(arr) {
   const vals = arr.filter(v => v !== null && v !== undefined);
   return vals.length ? vals.reduce((a,b)=>a+b,0)/vals.length : null;
@@ -843,7 +858,7 @@ function renderNotesBanner() {
   const relevant = allNotes.filter(n => (!year || n.y==year) && (!month || n.m==month));
   if (!relevant.length) { wrap.innerHTML = ''; return; }
   wrap.innerHTML = `<div class="notes-banner">${relevant.map(n =>
-    `<div class="notes-banner-item"><b>Catatan Analisis (${MONTHS_FULL[n.m]} ${n.y}):</b><span>${n.note}</span></div>`
+    `<div class="notes-banner-item"><b>Catatan Analisis (${MONTHS_FULL[n.m]} ${n.y}):</b><span>${escapeHtml(n.note)}</span></div>`
   ).join('')}</div>`;
 }
 
@@ -856,7 +871,7 @@ function getChartGridColor() { return document.documentElement.getAttribute('dat
 
 function makeLegend(elId, sites) {
   document.getElementById(elId).innerHTML = sites.map((s,i) =>
-    `<span class="legend-item"><span class="legend-dot" style="background:${COLORS[i%COLORS.length]}"></span>${s}</span>`
+    `<span class="legend-item"><span class="legend-dot" style="background:${COLORS[i%COLORS.length]}"></span>${escapeHtml(s)}</span>`
   ).join('');
 }
 
@@ -943,7 +958,7 @@ function renderOverview() {
     </div>
     <div class="metric-card">
       <div class="metric-label">Top Visitor Origin</div>
-      <div class="metric-val" style="font-size: 20px; padding-top: 6px; font-weight:700; color:var(--accent)">${topGlobalCountries}</div>
+      <div class="metric-val" style="font-size: 20px; padding-top: 6px; font-weight:700; color:var(--accent)">${escapeHtml(topGlobalCountries)}</div>
       <div class="metric-sub">Kontribusi asal traffic tertinggi</div>
     </div>
   `;
@@ -974,13 +989,13 @@ function renderOverview() {
 
     return `
       <div class="site-card" style="--i:${i}">
-        <h3>${site}</h3>
+        <h3>${escapeHtml(site)}</h3>
         <div class="site-period">${pLabel}</div>
         <div class="site-stat-row"><span class="site-stat-label">Avg. Visitors/Day</span><span class="site-stat-val">${fmtNum(rows.length > 1 ? Math.round(avgOrNull(rows.map(x=>x.daily))) : r.daily)}</span></div>
         <div class="site-stat-row"><span class="site-stat-label">Total Sessions</span><span class="site-stat-val">${fmtNum(sumOrNull(rows.map(x=>x.total)))}</span></div>
         <div class="site-stat-row"><span class="site-stat-label">Engagement Rate</span><span class="site-stat-val">${fmtPct(avgOrNull(rows.map(x=>x.engage)))}</span></div>
         <div class="site-stat-row"><span class="site-stat-label">WhatsApp Clicks</span><span class="site-stat-val">${fmtNum(sumOrNull(rows.map(x=>x.wa)))}</span></div>
-        <div class="site-stat-row row-countries"><span class="site-stat-label">Top Visitor Origin</span><span class="site-stat-val countries">${topSiteCountries}</span></div>
+        <div class="site-stat-row row-countries"><span class="site-stat-label">Top Visitor Origin</span><span class="site-stat-val countries">${escapeHtml(topSiteCountries)}</span></div>
       </div>
     `;
   }).join('');
@@ -1120,7 +1135,7 @@ function renderTable() {
     <table>
       <thead><tr><th>Website</th><th>Bulan</th><th>Tahun</th><th>Visitors/Day</th><th>Total Sessions</th><th>Engagement</th><th>Bounce Rate</th><th>Total Events</th><th>WA Leads</th><th>Top Origin</th></tr></thead>
       <tbody id="analytics-table-body">${sorted.map(r => `<tr>
-        <td><b>${r.site}</b></td>
+        <td><b>${escapeHtml(r.site)}</b></td>
         <td>${MONTHS_FULL[r.m]}</td>
         <td>${r.y}</td>
         <td>${fmtPlain(r.daily)}</td>
@@ -1129,7 +1144,7 @@ function renderTable() {
         <td>${r.bounce===null ? '-' : `<span class="badge ${r.bounce>=70?'badge-red':'badge-green'}">${r.bounce.toFixed(2)}%</span>`}</td>
         <td>${fmtPlain(r.events)}</td>
         <td>${fmtPlain(r.wa)}</td>
-        <td><code>${r.countries || '-'}</code></td>
+        <td><code>${escapeHtml(r.countries) || '-'}</code></td>
       </tr>`).join('')}</tbody>
     </table>
   `;
