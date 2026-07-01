@@ -164,7 +164,8 @@
   /* ===== Data Detail search: icon + animated clear button + row transitions ===== */
   .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); display: flex; color: var(--text3); pointer-events: none; transition: color .2s ease; }
   .search-group:focus-within .search-icon { color: var(--accent); }
-  .search-input { padding-left: 36px; padding-right: 34px; }
+  .search-input { padding-left: 36px; padding-right: 12px; transition: padding .15s ease; }
+  .search-input.has-clear { padding-right: 34px; }
   .search-clear { position: absolute; right: 8px; top: 50%; width: 22px; height: 22px; border-radius: 50%; border: none; background: var(--surface); color: var(--text3); cursor: pointer; font-size: 12px; line-height: 1; align-items: center; justify-content: center; display: none; opacity: 0; transform: translateY(-50%) scale(0.6); transition: background .15s ease, color .15s ease, opacity .15s ease, transform .15s ease; }
   .search-clear.show { display: flex; opacity: 1; transform: translateY(-50%) scale(1); }
   .search-clear:hover { background: var(--danger); color: #fff; }
@@ -317,6 +318,13 @@
     .grid4 { grid-template-columns: 1fr; }
     .card-header-flex { flex-direction: column; align-items: stretch; gap: 10px; }
     .card-header-flex .btn { width: 100%; }
+    /* .search-group carries `flex: 1 1 200px` for the row layout on desktop,
+       where 200px sets a minimum WIDTH. Once card-header-flex switches to
+       flex-direction: column here, that same flex-basis is read along the
+       vertical axis instead — turning into a 200px minimum HEIGHT and
+       leaving a large empty gap above the Export button. Reset it so the
+       search bar only takes the height its input actually needs. */
+    .card-header-flex .search-group { flex: 0 0 auto; }
     table { min-width: 720px; }
   }
 
@@ -902,7 +910,9 @@ function resetFilters() {
 function liveSearchTable() {
   const input = document.getElementById('table-search');
   const btn = document.getElementById('search-clear-btn');
-  btn.classList.toggle('show', input.value.length > 0);
+  const hasText = input.value.length > 0;
+  btn.classList.toggle('show', hasText);
+  input.classList.toggle('has-clear', hasText);
 
   clearTimeout(searchDebounceTimer);
   searchDebounceTimer = setTimeout(() => performTableSearch(input.value), prefersReducedMotion ? 0 : 150);
@@ -915,6 +925,7 @@ function clearTableSearch(silent) {
   const input = document.getElementById('table-search');
   if (!input) return;
   input.value = '';
+  input.classList.remove('has-clear');
   const btn = document.getElementById('search-clear-btn');
   if (btn) btn.classList.remove('show');
   clearTimeout(searchDebounceTimer);
