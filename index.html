@@ -57,7 +57,11 @@
   .navbar-row { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; padding-left: max(1.5rem, env(safe-area-inset-left)); padding-right: max(1.5rem, env(safe-area-inset-right)); height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
   .navbar-brand { font-size: 16px; font-weight: 600; letter-spacing: -0.3px; display: flex; align-items: center; gap: 8px; white-space: nowrap; min-width: 0; }
   .brand-text-viewport { overflow: hidden; min-width: 0; flex: 1 1 auto; }
-  .brand-text { display: inline-block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+  .brand-text { display: inline-block; white-space: nowrap; will-change: transform; }
+  /* Only gets this class from JS, and only when the text is actually
+     wider than its viewport on a narrow screen — see updateBrandMarquee().
+     Pure transform animation, so it costs nothing when not applied and
+     is cheap (GPU-composited) when it is. */
   .brand-text.marquee { animation: brandMarquee 7s ease-in-out infinite; }
   @keyframes brandMarquee {
     0%, 12% { transform: translateX(0); }
@@ -184,7 +188,7 @@
 
   mark.search-hit { background: var(--accent-light); color: var(--accent); padding: 0 2px; border-radius: 3px; font-weight: 700; }
 
-  #analytics-table-body tr { animation: rowFadeIn .35s ease both; animation-delay: calc(min(var(--i, 0), 16) * 18ms); transition: opacity .2s ease, transform .2s ease; }
+  #analytics-table-body tr { animation: rowFadeIn .35s ease both; animation-delay: calc(var(--i, 0) * 18ms); transition: opacity .2s ease, transform .2s ease; }
   @keyframes rowFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
   tr.row-hiding { opacity: 0 !important; transform: scale(0.985); }
   tr.row-entering { animation: rowFadeIn .3s ease both; }
@@ -196,9 +200,6 @@
   .site-card .site-period { font-size: 12px; color: var(--text3); margin-bottom: 1.25rem; }
   .site-stat-row { display: flex; align-items: baseline; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); gap: 10px; }
   .site-stat-row:last-child { border-bottom: none; }
-  .site-card-note { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border); display: flex; flex-direction: column; gap: 6px; }
-  .site-card-note-item { font-size: 11.5px; color: var(--text2); line-height: 1.5; display: flex; gap: 6px; align-items: flex-start; }
-  .site-card-note-item .note-icon { flex-shrink: 0; opacity: .8; }
   .site-stat-label { font-size: 13px; color: var(--text2); }
   .site-stat-val { font-size: 15px; font-weight: 600; color: var(--text); }
   .site-stat-val.countries { font-size: 12px; font-weight: 600; color: var(--accent); max-width: 60%; text-align: right; white-space: normal; line-height: 1.4; }
@@ -634,8 +635,17 @@ function toggleNavMenu() {
 // space it has, and only below the width where the collapsed navbar gives
 // it very little room. Cheap: one measurement, a CSS class, done.
 function updateBrandMarquee() {
-  // Marquee dinonaktifkan — teks brand sekarang di-truncate dengan ellipsis (...)
-  // lewat CSS text-overflow, tanpa animasi bergerak yang bisa mendistraksi.
+  const viewport = document.getElementById('brand-text-viewport');
+  const text = document.getElementById('brand-text');
+  if (!viewport || !text) return;
+  text.classList.remove('marquee');
+  text.style.removeProperty('--marquee-distance');
+  if (window.innerWidth > 640) return;
+  const overflow = text.scrollWidth - viewport.clientWidth;
+  if (overflow > 4) {
+    text.style.setProperty('--marquee-distance', overflow + 'px');
+    text.classList.add('marquee');
+  }
 }
 let brandResizeTimer = null;
 window.addEventListener('resize', () => {
@@ -1122,7 +1132,7 @@ function renderOverview() {
   const countryCounts = {};
   filtered.forEach(d => {
     if (d.countries) {
-      d.countries.split(',').forEach(c => {
+      d.countries.split(/[\s,]+/).forEach(c => {
         const clean = c.trim().toUpperCase();
         if (clean && clean !== '-' && clean !== 'N/A') {
           countryCounts[clean] = (countryCounts[clean] || 0) + 1;
@@ -1173,7 +1183,7 @@ function renderOverview() {
     const siteCountryCounts = {};
     rows.forEach(d => {
       if (d.countries) {
-        d.countries.split(',').forEach(c => {
+        d.countries.split(/[\s,]+/).forEach(c => {
           const clean = c.trim().toUpperCase();
           if (clean && clean !== '-' && clean !== 'N/A') {
             siteCountryCounts[clean] = (siteCountryCounts[clean] || 0) + 1;
@@ -1182,9 +1192,6 @@ function renderOverview() {
       }
     });
     const topSiteCountries = Object.entries(siteCountryCounts).sort((a, b) => b[1] - a[1]).slice(0, 2).map(e => e[0]).join(', ') || '-';
-
-    // Catatan bulanan yang relevan dengan periode data site ini
-    const siteNotes = allNotes.filter(n => rows.some(r => r.y === n.y && r.m === n.m));
 
     return `
       <div class="site-card" style="--i:${i}">
@@ -1195,11 +1202,6 @@ function renderOverview() {
         <div class="site-stat-row"><span class="site-stat-label">Engagement Rate</span><span class="site-stat-val">${fmtPct(avgOrNull(rows.map(x=>x.engage)))}</span></div>
         <div class="site-stat-row"><span class="site-stat-label">WhatsApp Clicks</span><span class="site-stat-val">${fmtNum(sumOrNull(rows.map(x=>x.wa)))}</span></div>
         <div class="site-stat-row row-countries"><span class="site-stat-label">Top Visitor Origin</span><span class="site-stat-val countries">${escapeHtml(topSiteCountries)}</span></div>
-        ${siteNotes.length ? `
-         <div class="site-card-note">
-        ${siteNotes.map(n => `<div class="site-card-note-item"><span class="note-icon">📌</span><span>${escapeHtml(n.note)}</span></div>`).join('')}
-      </div>
-    ` : ''}
       </div>
     `;
   }).join('');
