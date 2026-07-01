@@ -57,17 +57,7 @@
   .navbar-row { max-width: 1280px; margin: 0 auto; padding: 0 1.5rem; padding-left: max(1.5rem, env(safe-area-inset-left)); padding-right: max(1.5rem, env(safe-area-inset-right)); height: 64px; display: flex; align-items: center; justify-content: space-between; gap: 20px; }
   .navbar-brand { font-size: 16px; font-weight: 600; letter-spacing: -0.3px; display: flex; align-items: center; gap: 8px; white-space: nowrap; min-width: 0; }
   .brand-text-viewport { overflow: hidden; min-width: 0; flex: 1 1 auto; }
-  .brand-text { display: inline-block; white-space: nowrap; will-change: transform; }
-  /* Only gets this class from JS, and only when the text is actually
-     wider than its viewport on a narrow screen — see updateBrandMarquee().
-     Pure transform animation, so it costs nothing when not applied and
-     is cheap (GPU-composited) when it is. */
-  .brand-text.marquee { animation: brandMarquee 7s ease-in-out infinite; }
-  @keyframes brandMarquee {
-    0%, 12% { transform: translateX(0); }
-    50%, 62% { transform: translateX(calc(-1 * var(--marquee-distance, 0px))); }
-    96%, 100% { transform: translateX(0); }
-  }
+  .brand-text { display: inline-block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 
   /* Area Navigasi Utama Desktop */
   .navbar-left-group { display: flex; align-items: center; gap: 24px; min-width: 0; flex: 1 1 auto; }
@@ -160,6 +150,7 @@
   .badge-green { background: rgba(27, 175, 122, 0.12); color: var(--success); }
   .badge-blue { background: var(--accent-light); color: var(--accent); }
   .badge-red { background: rgba(227, 73, 72, 0.12); color: var(--danger); }
+  .badge-partial { background: rgba(237, 161, 0, 0.12); color: var(--warning); font-size: 10px; font-weight: 600; padding: 2px 8px; border-radius: 6px; margin-left: 8px; white-space: nowrap; vertical-align: middle; }
 
   .table-wrap { width: 100%; overflow-x: auto; -webkit-overflow-scrolling: touch; border-radius: 8px; border: 1px solid var(--border); max-height: 70vh; overflow-y: auto; position: relative; }
   table { width: 100%; border-collapse: collapse; font-size: clamp(12px, 1.2vw, 13px); min-width: 900px; text-align: left; }
@@ -188,7 +179,7 @@
 
   mark.search-hit { background: var(--accent-light); color: var(--accent); padding: 0 2px; border-radius: 3px; font-weight: 700; }
 
-  #analytics-table-body tr { animation: rowFadeIn .35s ease both; animation-delay: calc(var(--i, 0) * 18ms); transition: opacity .2s ease, transform .2s ease; }
+  #analytics-table-body tr { animation: rowFadeIn .35s ease both; animation-delay: calc(min(var(--i, 0), 16) * 18ms); transition: opacity .2s ease, transform .2s ease; }
   @keyframes rowFadeIn { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: translateY(0); } }
   tr.row-hiding { opacity: 0 !important; transform: scale(0.985); }
   tr.row-entering { animation: rowFadeIn .3s ease both; }
@@ -200,6 +191,9 @@
   .site-card .site-period { font-size: 12px; color: var(--text3); margin-bottom: 1.25rem; }
   .site-stat-row { display: flex; align-items: baseline; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); gap: 10px; }
   .site-stat-row:last-child { border-bottom: none; }
+  .site-card-note { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--border); display: flex; flex-direction: column; gap: 6px; }
+  .site-card-note-item { font-size: 11.5px; color: var(--text2); line-height: 1.5; display: flex; gap: 6px; align-items: flex-start; }
+  .site-card-note-item .note-icon { flex-shrink: 0; opacity: .8; }
   .site-stat-label { font-size: 13px; color: var(--text2); }
   .site-stat-val { font-size: 15px; font-weight: 600; color: var(--text); }
   .site-stat-val.countries { font-size: 12px; font-weight: 600; color: var(--accent); max-width: 60%; text-align: right; white-space: normal; line-height: 1.4; }
@@ -266,6 +260,10 @@
   /* Small toast for background-refresh notices (e.g. falling back to cached data) */
   .toast { position: fixed; bottom: calc(20px + env(safe-area-inset-bottom, 0px)); left: 50%; transform: translateX(-50%) translateY(12px); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-hover); padding: 11px 18px; border-radius: 10px; font-size: 13px; color: var(--text2); opacity: 0; transition: opacity .3s ease, transform .3s ease; z-index: 400; max-width: 90vw; text-align: center; pointer-events: none; }
   .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+  /* ===== Chart empty state ===== */
+  .chart-empty { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100%; min-height: 120px; color: var(--text3); font-size: 13px; gap: 8px; text-align: center; padding: 1rem; }
+  .chart-empty-icon { font-size: 26px; opacity: .45; }
 
   @media (max-width: 1024px) {
     .grid4 { grid-template-columns: repeat(2, 1fr); }
@@ -630,22 +628,11 @@ function toggleNavMenu() {
   btn.setAttribute('aria-expanded', isOpen ? 'true' : 'false');
 }
 
-// The brand text truncates on narrow screens. Rather than just clipping it,
-// scroll it back and forth — but only when it's actually wider than the
-// space it has, and only below the width where the collapsed navbar gives
-// it very little room. Cheap: one measurement, a CSS class, done.
+// Brand text truncation is handled purely via CSS text-overflow: ellipsis
+// now (see .brand-text). This function is kept as a harmless no-op so any
+// existing calls to it (on load / resize) don't need to be removed.
 function updateBrandMarquee() {
-  const viewport = document.getElementById('brand-text-viewport');
-  const text = document.getElementById('brand-text');
-  if (!viewport || !text) return;
-  text.classList.remove('marquee');
-  text.style.removeProperty('--marquee-distance');
-  if (window.innerWidth > 640) return;
-  const overflow = text.scrollWidth - viewport.clientWidth;
-  if (overflow > 4) {
-    text.style.setProperty('--marquee-distance', overflow + 'px');
-    text.classList.add('marquee');
-  }
+  // Intentionally empty — truncation is CSS-only, no JS measurement needed.
 }
 let brandResizeTimer = null;
 window.addEventListener('resize', () => {
@@ -1081,6 +1068,28 @@ function makeLegend(elId, sites) {
   ).join('');
 }
 
+// Toggles a "no data" placeholder over a chart canvas. Used whenever the
+// current filter combination leaves nothing to plot, so the user sees an
+// explicit explanation instead of a blank/empty canvas.
+function setChartEmpty(canvasId, isEmpty, message) {
+  const canvas = document.getElementById(canvasId);
+  if (!canvas) return;
+  const wrap = canvas.parentElement;
+  let emptyEl = wrap.querySelector('.chart-empty');
+  if (isEmpty) {
+    canvas.style.display = 'none';
+    if (!emptyEl) {
+      emptyEl = document.createElement('div');
+      emptyEl.className = 'chart-empty';
+      wrap.appendChild(emptyEl);
+    }
+    emptyEl.innerHTML = `<span class="chart-empty-icon">📊</span><span>${message || 'Tidak ada data untuk kombinasi filter ini'}</span>`;
+  } else {
+    canvas.style.display = 'block';
+    if (emptyEl) emptyEl.remove();
+  }
+}
+
 function calculateDelta(currentVal, metricName) {
   const siteFilter = document.getElementById('f-site').value;
   const yearFilter = document.getElementById('f-year').value;
@@ -1123,6 +1132,7 @@ function calculateDelta(currentVal, metricName) {
 }
 
 function renderOverview() {
+  const hasData = filtered.length > 0;
   const totalVisits = sumOrNull(filtered.map(d=>d.total)) || 0;
   const totalWA = sumOrNull(filtered.map(d=>d.wa));
   const avgEngage = avgOrNull(filtered.map(d=>d.engage));
@@ -1132,7 +1142,7 @@ function renderOverview() {
   const countryCounts = {};
   filtered.forEach(d => {
     if (d.countries) {
-      d.countries.split(/[\s,]+/).forEach(c => {
+      d.countries.split(',').forEach(c => {
         const clean = c.trim().toUpperCase();
         if (clean && clean !== '-' && clean !== 'N/A') {
           countryCounts[clean] = (countryCounts[clean] || 0) + 1;
@@ -1183,7 +1193,7 @@ function renderOverview() {
     const siteCountryCounts = {};
     rows.forEach(d => {
       if (d.countries) {
-        d.countries.split(/[\s,]+/).forEach(c => {
+        d.countries.split(',').forEach(c => {
           const clean = c.trim().toUpperCase();
           if (clean && clean !== '-' && clean !== 'N/A') {
             siteCountryCounts[clean] = (siteCountryCounts[clean] || 0) + 1;
@@ -1193,45 +1203,78 @@ function renderOverview() {
     });
     const topSiteCountries = Object.entries(siteCountryCounts).sort((a, b) => b[1] - a[1]).slice(0, 2).map(e => e[0]).join(', ') || '-';
 
+    // Catatan bulanan yang relevan dengan periode data site ini
+    const siteNotes = allNotes.filter(n => rows.some(r => r.y === n.y && r.m === n.m));
+
+    // Tandai card ini kalau ada bulan dengan salah satu metrik kosong (N/A),
+    // supaya user tahu angka rata-rata/total di card ini dihitung dari data
+    // yang belum lengkap.
+    const hasPartialData = rows.some(r =>
+      r.daily === null || r.total === null || r.engage === null ||
+      r.bounce === null || r.events === null || r.wa === null
+    );
+
     return `
       <div class="site-card" style="--i:${i}">
-        <h3>${escapeHtml(site)}</h3>
+        <h3>${escapeHtml(site)}${hasPartialData ? '<span class="badge-partial">Data Parsial</span>' : ''}</h3>
         <div class="site-period">${pLabel}</div>
         <div class="site-stat-row"><span class="site-stat-label">Avg. Visitors/Day</span><span class="site-stat-val">${fmtNum(rows.length > 1 ? Math.round(avgOrNull(rows.map(x=>x.daily))) : r.daily)}</span></div>
         <div class="site-stat-row"><span class="site-stat-label">Total Sessions</span><span class="site-stat-val">${fmtNum(sumOrNull(rows.map(x=>x.total)))}</span></div>
         <div class="site-stat-row"><span class="site-stat-label">Engagement Rate</span><span class="site-stat-val">${fmtPct(avgOrNull(rows.map(x=>x.engage)))}</span></div>
         <div class="site-stat-row"><span class="site-stat-label">WhatsApp Clicks</span><span class="site-stat-val">${fmtNum(sumOrNull(rows.map(x=>x.wa)))}</span></div>
         <div class="site-stat-row row-countries"><span class="site-stat-label">Top Visitor Origin</span><span class="site-stat-val countries">${escapeHtml(topSiteCountries)}</span></div>
+        ${siteNotes.length ? `
+         <div class="site-card-note">
+        ${siteNotes.map(n => `<div class="site-card-note-item"><span class="note-icon">📌</span><span>${escapeHtml(n.note)}</span></div>`).join('')}
+      </div>
+    ` : ''}
       </div>
     `;
   }).join('');
 
   const siteTotals = sites.map(s => sumOrNull(filtered.filter(d => d.site===s).map(d=>d.total)) || 0);
-  makeLegend('leg-visits', sites);
-  destroyChart('visits');
-  charts['visits'] = new Chart(document.getElementById('ch-visits'), {
-    type: 'bar',
-    data: { labels: sites.map(s => s.replace('.com','').replace('.co.id','')), datasets: [{ data: siteTotals, backgroundColor: COLORS.slice(0, sites.length), borderRadius: 6 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: indonesianTooltipConfig }, scales: { y: { ticks: { color: txtColor, callback: v => v >= 1000 ? (v/1000)+'k' : v }, grid: { color: gridColor } }, x: { ticks: { color: txtColor }, grid: { display: false } } } }
-  });
+  setChartEmpty('ch-visits', !hasData);
+  if (hasData) {
+    makeLegend('leg-visits', sites);
+    destroyChart('visits');
+    charts['visits'] = new Chart(document.getElementById('ch-visits'), {
+      type: 'bar',
+      data: { labels: sites.map(s => s.replace('.com','').replace('.co.id','')), datasets: [{ data: siteTotals, backgroundColor: COLORS.slice(0, sites.length), borderRadius: 6 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: indonesianTooltipConfig }, scales: { y: { ticks: { color: txtColor, callback: v => v >= 1000 ? (v/1000)+'k' : v }, grid: { color: gridColor } }, x: { ticks: { color: txtColor }, grid: { display: false } } } }
+    });
+  } else {
+    destroyChart('visits');
+    document.getElementById('leg-visits').innerHTML = '';
+  }
 
   const siteEngage = sites.map(s => { const v = avgOrNull(filtered.filter(d=>d.site===s).map(d=>d.engage)); return v === null ? 0 : +v.toFixed(1); });
   const siteBounce = sites.map(s => { const v = avgOrNull(filtered.filter(d=>d.site===s).map(d=>d.bounce)); return v === null ? 0 : +v.toFixed(1); });
-  destroyChart('engbounce');
-  charts['engbounce'] = new Chart(document.getElementById('ch-engbounce'), {
-    type: 'bar',
-    data: { labels: sites.map(s => s.replace('.com','').replace('.co.id','')), datasets: [{ label: 'Engagement (%)', data: siteEngage, backgroundColor: '#2a78d6', borderRadius: 4 }, { label: 'Bounce (%)', data: siteBounce, backgroundColor: '#e34948', borderRadius: 4 }] },
-    options: { responsive: true, maintainAspectRatio: false, scales: { y: { ticks: { color: txtColor, callback: v => v+'%' }, grid: { color: gridColor }, min: 0, max: 100 }, x: { ticks: { color: txtColor }, grid: { display: false } } } }
-  });
+  setChartEmpty('ch-engbounce', !hasData);
+  if (hasData) {
+    destroyChart('engbounce');
+    charts['engbounce'] = new Chart(document.getElementById('ch-engbounce'), {
+      type: 'bar',
+      data: { labels: sites.map(s => s.replace('.com','').replace('.co.id','')), datasets: [{ label: 'Engagement (%)', data: siteEngage, backgroundColor: '#2a78d6', borderRadius: 4 }, { label: 'Bounce (%)', data: siteBounce, backgroundColor: '#e34948', borderRadius: 4 }] },
+      options: { responsive: true, maintainAspectRatio: false, scales: { y: { ticks: { color: txtColor, callback: v => v+'%' }, grid: { color: gridColor }, min: 0, max: 100 }, x: { ticks: { color: txtColor }, grid: { display: false } } } }
+    });
+  } else {
+    destroyChart('engbounce');
+  }
 
   const siteWA = sites.map(s => sumOrNull(filtered.filter(d=>d.site===s).map(d=>d.wa)) || 0);
-  makeLegend('leg-wa', sites);
-  destroyChart('wa-bar');
-  charts['wa-bar'] = new Chart(document.getElementById('ch-wa-bar'), {
-    type: 'bar',
-    data: { labels: sites.map(s => s.replace('.com','').replace('.co.id','')), datasets: [{ data: siteWA, backgroundColor: COLORS.slice(0, sites.length), borderRadius: 6 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: indonesianTooltipConfig }, scales: { y: { ticks: { color: txtColor }, grid: { color: gridColor } }, x: { ticks: { color: txtColor }, grid: { display: false } } } }
-  });
+  setChartEmpty('ch-wa-bar', !hasData);
+  if (hasData) {
+    makeLegend('leg-wa', sites);
+    destroyChart('wa-bar');
+    charts['wa-bar'] = new Chart(document.getElementById('ch-wa-bar'), {
+      type: 'bar',
+      data: { labels: sites.map(s => s.replace('.com','').replace('.co.id','')), datasets: [{ data: siteWA, backgroundColor: COLORS.slice(0, sites.length), borderRadius: 6 }] },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: indonesianTooltipConfig }, scales: { y: { ticks: { color: txtColor }, grid: { color: gridColor } }, x: { ticks: { color: txtColor }, grid: { display: false } } } }
+    });
+  } else {
+    destroyChart('wa-bar');
+    document.getElementById('leg-wa').innerHTML = '';
+  }
 }
 
 function renderTrends() {
@@ -1244,6 +1287,15 @@ function renderTrends() {
   const site = document.getElementById('f-site').value;
   const sites = site ? [site] : allSites();
   const periods = allPeriods();
+
+  const hasTrendData = periods.length > 0 && sites.length > 0;
+  setChartEmpty('ch-trend', !hasTrendData, 'Belum ada data historis untuk ditampilkan');
+  if (!hasTrendData) {
+    destroyChart('trend');
+    document.getElementById('leg-trend').innerHTML = '';
+    return;
+  }
+
   const periodLabels = periods.map(p => { const [y,m] = p.split('-'); return MONTHS[+m] + ' ' + y; });
 
   const ctx = document.getElementById('ch-trend').getContext('2d');
@@ -1276,6 +1328,16 @@ function renderCompare() {
   const sites = allSites();
   const txtColor = getChartTextColor();
   const gridColor = getChartGridColor();
+
+  const hasCompareData = filtered.length > 0 && sites.length > 0;
+  setChartEmpty('ch-cmp-engage', !hasCompareData);
+  setChartEmpty('ch-cmp-bounce', !hasCompareData);
+  setChartEmpty('ch-events', !hasCompareData, 'Tidak ada data untuk kombinasi filter ini');
+  if (!hasCompareData) {
+    destroyChart('cmp-engage'); destroyChart('cmp-bounce'); destroyChart('events');
+    document.getElementById('leg-events').innerHTML = '';
+    return;
+  }
 
   // Ambil data rata-rata angka persentase dengan benar
   const siteEngage = sites.map(s => { const v = avgOrNull(filtered.filter(d=>d.site===s).map(d=>d.engage)); return v === null ? 0 : +v.toFixed(1); });
