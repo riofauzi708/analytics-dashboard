@@ -129,6 +129,9 @@
   .card h2 { font-size: 15px; font-weight: 600; color: var(--text); letter-spacing: -0.1px; }
   .chart-wrap { position: relative; width: 100%; }
 
+  /* Class tambahan untuk menangani state grafik kosong */
+  .chart-empty-state { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; color: var(--text3); font-size: 13px; font-style: italic; background: rgba(var(--surface), 0.4); pointer-events: none; }
+
   .legend { display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 16px; }
   .legend-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); font-weight: 500; }
   .legend-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
@@ -182,12 +185,10 @@
   .site-card h3 { font-size: 16px; font-weight: 600; color: var(--text); margin-bottom: 2px; letter-spacing: -0.2px; }
   .site-card .site-period { font-size: 12px; color: var(--text3); margin-bottom: 1.25rem; }
   
-  /* Flexbox adjustment for row items inside site card to hold badges nicely */
   .site-stat-row { display: flex; align-items: center; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid var(--border); gap: 10px; }
   .site-stat-row:last-child { border-bottom: none; }
   .site-stat-label { font-size: 13px; color: var(--text2); }
   
-  /* Container for the metric value and its comparative indicator badge */
   .site-stat-wrapper { display: flex; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; }
   .site-stat-val { font-size: 15px; font-weight: 600; color: var(--text); }
   .site-stat-badge { font-size: 11px; font-weight: 600; padding: 2px 6px; border-radius: 4px; display: inline-flex; align-items: center; gap: 2px; }
@@ -412,18 +413,18 @@
       <div class="site-cards" id="site-cards"></div>
 
       <div class="grid2">
-        <div class="card">
+        <div class="card" id="card-ch-visits">
           <h2>Distribusi Total Sesi Kunjungan</h2>
           <div class="legend" id="leg-visits"></div>
           <div class="chart-wrap" style="height:230px"><canvas id="ch-visits"></canvas></div>
         </div>
-        <div class="card">
+        <div class="card" id="card-ch-engbounce">
           <h2>Engagement Rate vs Bounce Rate</h2>
           <div class="legend"><span class="legend-item"><span class="legend-dot" style="background:#2a78d6"></span>Engagement</span><span class="legend-item"><span class="legend-dot" style="background:#e34948"></span>Bounce</span></div>
           <div class="chart-wrap" style="height:230px"><canvas id="ch-engbounce"></canvas></div>
         </div>
       </div>
-      <div class="card section-full">
+      <div class="card section-full" id="card-ch-wa-bar">
         <h2>Konversi WhatsApp Leads</h2>
         <div class="legend" id="leg-wa"></div>
         <div class="chart-wrap" style="height:190px"><canvas id="ch-wa-bar"></canvas></div>
@@ -444,7 +445,7 @@
           </select>
         </div>
       </div>
-      <div class="card section-full">
+      <div class="card section-full" id="card-ch-trend">
         <h2 id="trend-title">Tren Historis</h2>
         <div class="legend" id="leg-trend"></div>
         <div class="chart-wrap" style="height:320px"><canvas id="ch-trend"></canvas></div>
@@ -453,16 +454,16 @@
 
     <div id="tab-compare" class="section">
       <div class="grid2">
-        <div class="card">
+        <div class="card" id="card-ch-cmp-engage">
           <h2>Perbandingan Engagement Rate</h2>
           <div class="chart-wrap" style="height:260px"><canvas id="ch-cmp-engage"></canvas></div>
         </div>
-        <div class="card">
+        <div class="card" id="card-ch-cmp-bounce">
           <h2>Perbandingan Bounce Rate</h2>
           <div class="chart-wrap" style="height:260px"><canvas id="ch-cmp-bounce"></canvas></div>
         </div>
       </div>
-      <div class="card section-full">
+      <div class="card section-full" id="card-ch-events">
         <h2>Volume Event Activity</h2>
         <div class="legend" id="leg-events"></div>
         <div class="chart-wrap" style="height:230px"><canvas id="ch-events"></canvas></div>
@@ -979,6 +980,35 @@ function destroyChart(id) { if(charts[id]) { charts[id].destroy(); delete charts
 function getChartTextColor() { return document.documentElement.getAttribute('data-theme') === 'dark' ? '#b3b7c3' : '#495057'; }
 function getChartGridColor() { return document.documentElement.getAttribute('data-theme') === 'dark' ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.05)'; }
 
+function checkEmptyChartState(containerId, isDataEmpty) {
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  const oldMsg = container.querySelector('.chart-empty-state');
+  if (oldMsg) oldMsg.remove();
+  if (isDataEmpty) {
+    const msgEl = document.createElement('div');
+    msgEl.className = 'chart-empty-state';
+    msgEl.textContent = 'Tidak ada data untuk filter ini';
+    container.appendChild(msgEl);
+  }
+}
+
+function handleChartClickFilter(event, chartInstance, sitesArray) {
+  const points = chartInstance.getElementsAtEventForMode(event, 'nearest', { intersect: true }, true);
+  if (points.length) {
+    const firstPoint = points[0];
+    const targetSite = sitesArray[firstPoint.index];
+    if (targetSite) {
+      const selectSiteEl = document.getElementById('f-site');
+      if (selectSiteEl) {
+        selectSiteEl.value = targetSite;
+        applyFilters();
+        showToast(`Memfilter website: ${targetSite}`);
+      }
+    }
+  }
+}
+
 function makeLegend(elId, sites) {
   document.getElementById(elId).innerHTML = sites.map((s,i) =>
     `<span class="legend-item"><span class="legend-dot" style="background:${COLORS[i%COLORS.length]}"></span>${escapeHtml(s)}</span>`
@@ -1026,9 +1056,6 @@ function calculateDelta(currentVal, metricName) {
   };
 }
 
-/**
- * Fungsi pembantu baru untuk menghitung perbandingan bulan lalu khusus per website
- */
 function calculateSiteDelta(site, currentVal, metricName, currentMonth, currentYear) {
   if (!currentMonth || !currentYear || currentVal === null) {
     return '';
@@ -1053,7 +1080,6 @@ function calculateSiteDelta(site, currentVal, metricName, currentMonth, currentY
   let sign = '•';
   
   if (pctChange > 0) {
-    // Pada bounce rate, kenaikan angka justru bernilai buruk (merah)
     cls = (metricName === 'bounce') ? 'down' : 'up';
     sign = '▲';
   } else if (pctChange < 0) {
@@ -1135,7 +1161,6 @@ function renderOverview() {
     });
     const topSiteCountries = Object.entries(siteCountryCounts).sort((a, b) => b[1] - a[1]).slice(0, 2).map(e => e[0]).join(', ') || '-';
 
-    // Ambil data nilai asli untuk dihitung komparasinya (hanya valid jika filter spesifik 1 bulan dipilih)
     const yearFilter = document.getElementById('f-year').value;
     const monthFilter = document.getElementById('f-month').value;
     const currentMonth = monthFilter ? parseInt(monthFilter) : (rows.length === 1 ? r.m : null);
@@ -1146,7 +1171,6 @@ function renderOverview() {
     const engageVal = avgOrNull(rows.map(x=>x.engage));
     const waVal = sumOrNull(rows.map(x=>x.wa));
 
-    // Hitung badge komparasi indikator hijau/merah
     const dailyDeltaBadge = calculateSiteDelta(site, dailyVal, 'daily', currentMonth, currentYear);
     const totalDeltaBadge = calculateSiteDelta(site, totalVal, 'total', currentMonth, currentYear);
     const engageDeltaBadge = calculateSiteDelta(site, engageVal, 'engage', currentMonth, currentYear);
@@ -1198,30 +1222,64 @@ function renderOverview() {
   }).join('');
 
   const siteTotals = sites.map(s => sumOrNull(filtered.filter(d => d.site===s).map(d=>d.total)) || 0);
+  const isVisitsEmpty = siteTotals.every(v => v === 0);
   makeLegend('leg-visits', sites);
   destroyChart('visits');
+  checkEmptyChartState('card-ch-visits', isVisitsEmpty);
+  
   charts['visits'] = new Chart(document.getElementById('ch-visits'), {
     type: 'bar',
     data: { labels: sites.map(s => s.replace('.com','').replace('.co.id','')), datasets: [{ data: siteTotals, backgroundColor: COLORS.slice(0, sites.length), borderRadius: 6 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: indonesianTooltipConfig }, scales: { y: { ticks: { color: txtColor, callback: v => v >= 1000 ? (v/1000)+'k' : v }, grid: { color: gridColor } }, x: { ticks: { color: txtColor }, grid: { display: false } } } }
+    options: { 
+      responsive: true, 
+      maintainAspectRatio: false, 
+      onClick: (e) => handleChartClickFilter(e, charts['visits'], sites),
+      plugins: { legend: { display: false }, tooltip: indonesianTooltipConfig }, 
+      scales: { 
+        y: { ticks: { color: txtColor, callback: v => v >= 1000 ? (v/1000)+'k' : v }, grid: { color: gridColor } }, 
+        x: { ticks: { color: txtColor, autoSkip: true, font: { size: window.innerWidth < 640 ? 10 : 12 } }, grid: { display: false } } 
+      } 
+    }
   });
 
   const siteEngage = sites.map(s => { const v = avgOrNull(filtered.filter(d=>d.site===s).map(d=>d.engage)); return v === null ? 0 : +v.toFixed(1); });
   const siteBounce = sites.map(s => { const v = avgOrNull(filtered.filter(d=>d.site===s).map(d=>d.bounce)); return v === null ? 0 : +v.toFixed(1); });
+  const isEngBounceEmpty = siteEngage.every(v => v === 0) && siteBounce.every(v => v === 0);
   destroyChart('engbounce');
+  checkEmptyChartState('card-ch-engbounce', isEngBounceEmpty);
+  
   charts['engbounce'] = new Chart(document.getElementById('ch-engbounce'), {
     type: 'bar',
     data: { labels: sites.map(s => s.replace('.com','').replace('.co.id','')), datasets: [{ label: 'Engagement (%)', data: siteEngage, backgroundColor: '#2a78d6', borderRadius: 4 }, { label: 'Bounce (%)', data: siteBounce, backgroundColor: '#e34948', borderRadius: 4 }] },
-    options: { responsive: true, maintainAspectRatio: false, scales: { y: { ticks: { color: txtColor, callback: v => v+'%' }, grid: { color: gridColor }, min: 0, max: 100 }, x: { ticks: { color: txtColor }, grid: { display: false } } } }
+    options: { 
+      responsive: true, 
+      maintainAspectRatio: false, 
+      scales: { 
+        y: { ticks: { color: txtColor, callback: v => v+'%' }, grid: { color: gridColor }, min: 0, max: 100 }, 
+        x: { ticks: { color: txtColor, autoSkip: true, font: { size: window.innerWidth < 640 ? 10 : 12 } }, grid: { display: false } } 
+      } 
+    }
   });
 
   const siteWA = sites.map(s => sumOrNull(filtered.filter(d=>d.site===s).map(d=>d.wa)) || 0);
+  const isWaEmpty = siteWA.every(v => v === 0);
   makeLegend('leg-wa', sites);
   destroyChart('wa-bar');
+  checkEmptyChartState('card-ch-wa-bar', isWaEmpty);
+  
   charts['wa-bar'] = new Chart(document.getElementById('ch-wa-bar'), {
     type: 'bar',
     data: { labels: sites.map(s => s.replace('.com','').replace('.co.id','')), datasets: [{ data: siteWA, backgroundColor: COLORS.slice(0, sites.length), borderRadius: 6 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: indonesianTooltipConfig }, scales: { y: { ticks: { color: txtColor }, grid: { color: gridColor } }, x: { ticks: { color: txtColor }, grid: { display: false } } } }
+    options: { 
+      responsive: true, 
+      maintainAspectRatio: false, 
+      onClick: (e) => handleChartClickFilter(e, charts['wa-bar'], sites),
+      plugins: { legend: { display: false }, tooltip: indonesianTooltipConfig }, 
+      scales: { 
+        y: { ticks: { color: txtColor }, grid: { color: gridColor } }, 
+        x: { ticks: { color: txtColor, autoSkip: true, font: { size: window.innerWidth < 640 ? 10 : 12 } }, grid: { display: false } } 
+      } 
+    }
   });
 }
 
@@ -1237,12 +1295,18 @@ function renderTrends() {
   const periods = allPeriods();
   const periodLabels = periods.map(p => { const [y,m] = p.split('-'); return MONTHS[+m] + ' ' + y; });
 
-  const ctx = document.getElementById('ch-trend').getContext('2d');
+  const container = document.getElementById('ch-trend');
+  if(!container) return;
+  const ctx = container.getContext('2d');
+  
+  let totalValidValues = 0;
   const datasets = sites.map((s, i) => {
     const vals = periods.map(p => {
       const [y, m] = p.split('-');
       const row = allData.find(d => d.site===s && d.y==y && d.m==+m);
-      return row ? row[metric] : null;
+      const value = row ? row[metric] : null;
+      if (value !== null) totalValidValues++;
+      return value;
     });
     const grad = ctx.createLinearGradient(0, 0, 0, 300);
     grad.addColorStop(0, COLORS[i % COLORS.length] + '18');
@@ -1256,10 +1320,12 @@ function renderTrends() {
 
   makeLegend('leg-trend', sites);
   destroyChart('trend');
+  checkEmptyChartState('card-ch-trend', totalValidValues === 0);
+  
   charts['trend'] = new Chart(document.getElementById('ch-trend'), {
     type: 'line',
     data: { labels: periodLabels, datasets },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: indonesianTooltipConfig }, scales: { y: { ticks: { color: txtColor }, grid: { color: gridColor } }, x: { ticks: { color: txtColor }, grid: { display: false } } } }
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: indonesianTooltipConfig }, scales: { y: { ticks: { color: txtColor }, grid: { color: gridColor } }, x: { ticks: { color: txtColor, font: { size: window.innerWidth < 640 ? 10 : 12 } }, grid: { display: false } } } }
   });
 }
 
@@ -1275,47 +1341,44 @@ function renderCompare() {
   const labels = sites.map(s => s.replace('.com','').replace('.co.id','').replace('.id',''));
 
   destroyChart('cmp-engage');
+  checkEmptyChartState('card-ch-cmp-engage', siteEngage.every(v => v === 0));
   charts['cmp-engage'] = new Chart(document.getElementById('ch-cmp-engage'), {
     type: 'bar',
-    data: {
-      labels: labels, 
-      datasets: [{ data: siteEngage, backgroundColor: '#2a78d6', borderRadius: 4 }]
-    },
+    data: { labels: labels, datasets: [{ data: siteEngage, backgroundColor: '#2a78d6', borderRadius: 4 }] },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
         y: { ticks: { color: txtColor, callback: v => v+'%' }, grid: { color: gridColor }, min: 0, max: 100 },
-        x: { ticks: { color: txtColor, autoSkip: false, maxRotation: 45, minRotation: 45 }, grid: { display: false } }
+        x: { ticks: { color: txtColor, autoSkip: true, maxRotation: 0, font: { size: window.innerWidth < 640 ? 10 : 12 } }, grid: { display: false } }
       }
     }
   });
 
   destroyChart('cmp-bounce');
+  checkEmptyChartState('card-ch-cmp-bounce', siteBounce.every(v => v === 0));
   charts['cmp-bounce'] = new Chart(document.getElementById('ch-cmp-bounce'), {
     type: 'bar',
-    data: {
-      labels: labels, 
-      datasets: [{ data: siteBounce, backgroundColor: '#e34948', borderRadius: 4 }]
-    },
+    data: { labels: labels, datasets: [{ data: siteBounce, backgroundColor: '#e34948', borderRadius: 4 }] },
     options: {
       responsive: true,
       maintainAspectRatio: false,
       plugins: { legend: { display: false } },
       scales: {
         y: { ticks: { color: txtColor, callback: v => v+'%' }, grid: { color: gridColor }, min: 0, max: 100 },
-        x: { ticks: { color: txtColor, autoSkip: false, maxRotation: 45, minRotation: 45 }, grid: { display: false } }
+        x: { ticks: { color: txtColor, autoSkip: true, maxRotation: 0, font: { size: window.innerWidth < 640 ? 10 : 12 } }, grid: { display: false } }
       }
     }
   });
 
   makeLegend('leg-events', sites);
   destroyChart('events');
+  checkEmptyChartState('card-ch-events', siteEvents.every(v => v === 0));
   charts['events'] = new Chart(document.getElementById('ch-events'), {
     type: 'bar',
     data: { labels, datasets: [{ data: siteEvents, backgroundColor: COLORS.slice(0, sites.length), borderRadius: 5 }] },
-    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: indonesianTooltipConfig }, scales: { y: { ticks: { color: txtColor, callback: v => v>1000 ? (v/1000)+'k' : v }, grid: { color: gridColor } }, x: { ticks: { color: txtColor }, grid: { display: false } } } }
+    options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false }, tooltip: indonesianTooltipConfig }, scales: { y: { ticks: { color: txtColor, callback: v => v>1000 ? (v/1000)+'k' : v }, grid: { color: gridColor } }, x: { ticks: { color: txtColor, autoSkip: true, font: { size: window.innerWidth < 640 ? 10 : 12 } }, grid: { display: false } } } }
   });
 }
 
